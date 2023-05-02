@@ -8,20 +8,26 @@ const App = () => {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoTime, setVideoTime] = useState(0);
+  const [videoFile, setVideoFile] = useState('');
 
-  const handleImageClick = (index) => {
-    console.log('clickclick',index)
-    if (index === 0) {
+ 
+
+  const handleImageClick = (id) => {
+    const image = images.find((img) => img.id === id);
+    if (image) {
+      console.log(image,'image')
+      setVideoFile(image.video);
       setIsPlaying(true);
     }
   };
+  
 
   const images = [
-    './images/Capture.png',
-    './images/Capture2.png',
-    './images/Capture3.png',
-    './images/Capture4.png',
-    './images/Capture5.png',
+    { id: 0, image: './images/Capture.png', video: './images/test.mp4' },
+    { id: 1, image: './images/Capture2.png', video: './images/test2.mp4' },
+    { id: 2, image: './images/Capture3.png', video: './images/test3.mp4' },
+    { id: 3, image: './images/Capture4.png', video: './images/test.mp4' },
+    { id: 4, image: './images/Capture5.png', video: './images/test2.mp4' },
   ];
 
   const handleButtonClick = () => {
@@ -42,9 +48,9 @@ const App = () => {
   return (
     <div className="container">
       <div className="first">
-      <Gridmain images={images}  handleClick={handleImageClick} />
-     
-      <Button variant="contained">Hello World</Button>
+        <Gridmain images={images} handleClick={handleImageClick} />
+
+        <Button variant="contained">Hello World</Button>
         <button onClick={handleButtonClick}>Play Video</button>
       </div>
       <div className="second">
@@ -52,7 +58,20 @@ const App = () => {
         {!isPlaying ? (
           <button onClick={handleButtonClick}>Play Video</button>
         ) : (
-          <video ref={videoRef} src="/test.mp4" controls style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', display: isPlaying ? 'block' : 'none' }} onEnded={handleVideoEnd} currenttime={videoTime}></video>
+          <video
+            ref={videoRef}
+            src={videoFile}
+            controls
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              display: isPlaying ? 'block' : 'none',
+            }}
+            onEnded={handleVideoEnd}
+            currenttime={videoTime}
+          ></video>
         )}
       </div>
     </div>

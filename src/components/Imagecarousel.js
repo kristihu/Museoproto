@@ -1,18 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
-const Imagecarousel = ({ images }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-
-  useEffect(() => {
-    setCurrentSlide(0);
-  }, [images]);
-
+const Imagecarousel = ({ images, clickedImageIndex }) => {
   return (
     <Carousel
-      selectedItem={currentSlide}
-      autoPlay
+      autoPlay={clickedImageIndex === null}
       infiniteLoop
       showThumbs={false}
       showStatus={false}
@@ -22,13 +15,21 @@ const Imagecarousel = ({ images }) => {
       transitionTime={1000}
       swipeable={false}
       stopOnHover={false}
+      selectedItem={clickedImageIndex || 0}
     >
       {images.map((image, index) => (
-        <div key={index} style={{ height: "100vh", overflow: "hidden" }}>
+        <div
+          key={index}
+          style={{
+            height: "100vh",
+            overflow: "hidden",
+            backgroundColor: "black",
+          }}
+        >
           <img
             src={image}
             alt=""
-            style={{ width: "100%", objectFit: "cover" }}
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
           />
         </div>
       ))}

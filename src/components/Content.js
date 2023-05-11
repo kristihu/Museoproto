@@ -5,6 +5,8 @@ import Imagecarousel from "./Imagecarousel";
 const Content = ({ currentSubcategory, resetState }) => {
   const [content, setContent] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [clickedImageIndex, setClickedImageIndex] = useState(null);
+  const [showCarousel, setShowCarousel] = useState(false);
 
   const handleReturn = () => {
     resetState();
@@ -17,17 +19,26 @@ const Content = ({ currentSubcategory, resetState }) => {
       .then((data) => {
         setContent(data);
         setIsLoading(false);
+        setShowCarousel(!data.some((item) => item.video_path));
       })
       .catch((error) => console.log(error));
   }, [currentSubcategory]);
 
-  const renderContentItem = (item, showVideo) => (
+  const test = (index) => {
+    setClickedImageIndex(index);
+    setShowCarousel(true);
+  };
+
+  const renderContentItem = (item, index) => (
     <div key={item.id}>
       <h3>{item.name}</h3>
       <p>{item.text}</p>
-      {showVideo && item.video_path && (
-        <video src={item.video_path} autoPlay loop muted />
-      )}
+      <img
+        onClick={() => test(index)}
+        className="test"
+        src={item.image_path}
+        alt={item.name}
+      />
     </div>
   );
 
@@ -42,23 +53,25 @@ const Content = ({ currentSubcategory, resetState }) => {
 
   const renderImageCarousel = () => {
     const imagePaths = content.map((item) => item.image_path);
-    return <Imagecarousel images={imagePaths} />;
+    return (
+      <Imagecarousel
+        images={imagePaths}
+        clickedImageIndex={clickedImageIndex}
+      />
+    );
   };
 
   return (
     <div className="container">
       <div className="first">
-        <button onClick={handleReturn}>Return to Categories</button>
-        {content.map((item) => renderContentItem(item, false))}
+        <button onClick={handleReturn}>Home</button>
+        {content.map((item, index) => renderContentItem(item, index))}
       </div>
       <div className="second">
         {isLoading ? (
           <div>Loading...</div>
         ) : (
-          <>
-            {renderVideoPlayer()}
-            {renderImageCarousel()}
-          </>
+          <>{showCarousel ? renderImageCarousel() : renderVideoPlayer()}</>
         )}
       </div>
     </div>

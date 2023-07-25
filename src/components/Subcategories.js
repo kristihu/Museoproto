@@ -1,51 +1,82 @@
-import React, { useEffect, useState } from "react";
-import Content from "./Content";
+import React from "react";
+import { Grid, Box, Typography } from "@mui/material";
 
-const Subcategories = ({ clickedCategory, resetState }) => {
-  const [subcategories, setSubcategories] = useState([]);
-  const [currentSubcategory, setCurrentSubcategory] = useState(null);
-
-  useEffect(() => {
-    fetch(`http://localhost:3001/subcategories/${clickedCategory.id}`)
-      .then((response) => response.json())
-      .then((data) => {
-        const subcategories = data.map((subcat) => ({
-          id: subcat.id,
-          image_path: subcat.image_path,
-          name: subcat.name,
-        }));
-        setSubcategories(subcategories);
-      })
-      .catch((error) => console.log(error));
-  }, [clickedCategory]);
-
-  const handleSubcategoryClick = (id) => {
-    console.log(id, "tyhmä");
-    setCurrentSubcategory(id);
-  };
-
+const Subcategories = ({ subcategories, onSubcategoryClick }) => {
   return (
-    <div>
-      {!currentSubcategory && (
-        <div>
-          {subcategories.map((subcat) => (
-            <img
-              src={subcat.image_path}
-              alt={subcat.name}
-              key={subcat.id}
-              onClick={() => handleSubcategoryClick(subcat.id)}
-            />
-          ))}
-        </div>
-      )}
-      {currentSubcategory && (
-        <Content
-          currentSubcategory={currentSubcategory}
-          setCurrentSubcategory={setCurrentSubcategory}
-          setSubcategories={setSubcategories}
-          resetState={resetState}
-        />
-      )}
+    <div style={{ height: "100vh", width: "100vw" }}>
+      <Typography
+        variant="h3"
+        align="center"
+        sx={{
+          fontFamily: "Montserrat",
+          fontStyle: "italic",
+          fontWeight: 600,
+          marginTop: "110px",
+          marginBottom: "70px",
+        }}
+      >
+        Title Here
+      </Typography>
+      <Grid
+        container
+        style={{
+          marginLeft: "311px",
+          maxWidth: "60%",
+          flexWrap: "wrap",
+        }}
+        justifyContent="center"
+        alignItems="center"
+        spacing={8}
+      >
+        {subcategories.map((subcategory) => (
+          <Grid item xs={3} key={subcategory.id}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100%",
+                textAlign: "center",
+                marginTop: "-30px",
+              }}
+            >
+              <div
+                style={{
+                  width: "240px",
+                  height: "164px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
+                }}
+              >
+                <img
+                  src={`http://localhost:3001${subcategory.image_path}`}
+                  alt={subcategory.name}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  onClick={() => onSubcategoryClick(subcategory.id)}
+                />
+              </div>
+              <Typography
+                variant="subtitle1"
+                align="center"
+                sx={{
+                  fontFamily: "Montserrat",
+                  fontStyle: "italic",
+                  fontWeight: 700,
+                }}
+              >
+                {subcategory.name}
+              </Typography>
+            </Box>
+          </Grid>
+        ))}
+      </Grid>
     </div>
   );
 };

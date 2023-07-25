@@ -1,0 +1,9 @@
+.sidebar {
+  width: 230px; /* Adjust this to the width you want for your sidebar */
+  position: fixed;
+  right: 0; /* Position it on the right side */
+  top: 0;
+  bottom: 0;
+  background: #f0f0f0; /* Adjust this to your desired background color */
+  overflow: auto;
+}

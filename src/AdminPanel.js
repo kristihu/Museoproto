@@ -26,6 +26,8 @@ import {
   updateContentText,
   createMedia,
   createContentText,
+  deleteSubcategory,
+  fetchSubcategoryDetails,
 } from "./components/api";
 
 const AdminPanel = () => {
@@ -33,17 +35,38 @@ const AdminPanel = () => {
   const [subcategories, setSubcategories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editSubcategory, setEditSubcategory] = useState([]);
-
+  const [editSubcategory, setEditSubcategory] = useState({
+    id: null,
+    name: "",
+    name_en: "",
+    name_sv: "",
+    alateksti: "",
+    alateksti_en: "",
+    alateksti_sv: "",
+    image_path: "",
+    category_id: null,
+  });
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedMediaImage, setSelectedMediaImage] = useState(null);
-  const [newSubcategory, setNewSubcategory] = useState([]);
+  const [newSubcategory, setNewSubcategory] = useState({
+    name: "",
+    name_en: "",
+    name_sv: "",
+    alateksti: "",
+    alateksti_en: "",
+    alateksti_sv: "",
+    selectedImage: null,
+  });
   const [mediaModalOpen, setMediaModalOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState([]);
   const [selectedContentText, setSelectedContentText] = useState([]);
   const [updatedImageText, setUpdatedImageText] = useState([]);
   const [updatedImageTextBold, setUpdatedImageTextBold] = useState([]);
-  const [updatedContentText, setUpdatedContentText] = useState("");
+  const [updatedContentText, setUpdatedContentText] = useState({
+    text: "",
+    text_en: "",
+    text_sv: "",
+  });
   const [addMediaModal, setAddMediaModal] = useState(false);
   const [newMedia, setNewMedia] = useState({
     imagetext: "",
@@ -51,8 +74,8 @@ const AdminPanel = () => {
     selectedMediaFile: null,
     mediaType: "image", // or video
   });
-
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
+  const [subcategory, setSubcategory] = useState(null);
 
   useEffect(() => {
     fetchCategories()
@@ -72,13 +95,40 @@ const AdminPanel = () => {
     }
   }, [selectedCategory]);
 
+  const fetchSubcategoryWithLanguage = (subcategoryId, language) => {
+    return fetchSubcategories(subcategoryId, language)
+      .then((response) => response.data[0])
+      .catch((error) => {
+        console.error(
+          `Error fetching subcategory details (${language}):`,
+          error
+        );
+      });
+  };
+
   const handleEdit = (subcategoryId) => {
-    const subcategory = subcategories.find((s) => s.id === subcategoryId);
-    setEditSubcategory({
-      id: subcategoryId,
-      name: subcategory.name,
-    });
-    setEditModalOpen(true);
+    fetchSubcategoryDetails(subcategoryId)
+      .then((response) => {
+        const subcategoryDetails = response.data[0];
+        console.log(subcategoryDetails.name, "data?");
+
+        setEditSubcategory({
+          id: subcategoryId,
+          name: subcategoryDetails.name,
+          name_en: subcategoryDetails.name_en,
+          name_sv: subcategoryDetails.name_sv,
+          alateksti: subcategoryDetails.alateksti,
+          alateksti_en: subcategoryDetails.alateksti_en,
+          alateksti_sv: subcategoryDetails.alateksti_sv,
+          image_path: subcategoryDetails.image_path,
+          category_id: subcategoryDetails.category_id,
+        });
+
+        setEditModalOpen(true);
+      })
+      .catch((error) => {
+        console.error("Error fetching subcategory details:", error);
+      });
   };
 
   const handleEditContent = (subcategory) => {
@@ -101,16 +151,23 @@ const AdminPanel = () => {
         );
       });
   };
-
   const handleSaveEditContentText = (id) => {
-    const updatedText = updatedContentText;
+    const updatedText = {
+      text: updatedContentText.text,
+      text_en: updatedContentText.text_en,
+      text_sv: updatedContentText.text_sv,
+    };
 
     if (selectedContentText.length === 0) {
       // If there is no content text, create a new one
       createContentText(id, updatedText)
         .then((response) => {
           setSelectedContentText([response.data]);
-          setUpdatedContentText("");
+          setUpdatedContentText({
+            text: "",
+            text_en: "",
+            text_sv: "",
+          });
         })
         .catch((error) => {
           console.error("Error creating content text: ", error);
@@ -125,7 +182,11 @@ const AdminPanel = () => {
               console.error("Error fetching content text: ", error);
             });
 
-          setUpdatedContentText("");
+          setUpdatedContentText({
+            text: "",
+            text_en: "",
+            text_sv: "",
+          });
         })
         .catch((error) => {
           console.error("Error updating content text: ", error);
@@ -158,7 +219,11 @@ const AdminPanel = () => {
         setSubcategories((prevState) => [...prevState, response.data]);
         setNewSubcategory({
           name: "",
-          imagePath: "",
+          name_en: "",
+          name_sv: "",
+          alateksti: "",
+          alateksti_en: "",
+          alateksti_sv: "",
           selectedImage: null,
         });
       })
@@ -189,14 +254,6 @@ const AdminPanel = () => {
       });
   };
 
-  const handleDelete = (id) => {
-    console.log(`Delete record with id: ${id}`);
-  };
-
-  const handleContentTextChange = (event) => {
-    setUpdatedContentText(event.target.value);
-  };
-
   const handleImageTextChange = (event, index) => {
     const { name, value } = event.target;
     if (name === "imagetext") {
@@ -222,7 +279,7 @@ const AdminPanel = () => {
     formData.append("imagetextbold", newMedia.imagetextbold);
     formData.append("type", newMedia.mediaType);
 
-    createMedia(selectedSubcategory.id, formData) // ensure you are passing the id of the selected subcategory here
+    createMedia(selectedSubcategory.id, formData)
       .then((response) => {
         setSelectedMedia((prevState) => [...prevState, response.data]);
         setNewMedia({
@@ -287,6 +344,35 @@ const AdminPanel = () => {
       });
   };
 
+  const handleDeleteSubcategory = (subcategoryId) => {
+    console.log(subcategoryId, "IDIDIDIIDIDI");
+    deleteSubcategory(subcategoryId)
+      .then(() => {
+        // Remove the deleted subcategory from the list
+        setSubcategories((prevState) =>
+          prevState.filter((subcategory) => subcategory.id !== subcategoryId)
+        );
+        // Remove related media for the deleted subcategory
+        setSelectedMedia((prevState) =>
+          prevState.filter((media) => media.subcategory_id !== subcategoryId)
+        );
+      })
+      .catch((error) => {
+        console.error("Error deleting subcategory: ", error);
+      });
+  };
+
+  const handleDelete = (subcategoryId) => {
+    // Show a confirmation dialog before deleting
+    const shouldDelete = window.confirm(
+      "Are you sure you want to delete this subcategory and its related media?"
+    );
+
+    if (shouldDelete) {
+      handleDeleteSubcategory(subcategoryId);
+    }
+  };
+
   return (
     <div
       className="admin-panel"
@@ -304,9 +390,9 @@ const AdminPanel = () => {
       </Select>
 
       <div className="create-subcategory-section">
-        <h2>Add new subcategory</h2>
+        <h2>Lisää uusi alakategoria</h2>
         <TextField
-          label="Name"
+          label="Nimi"
           value={newSubcategory.name}
           onChange={(e) =>
             setNewSubcategory((prevSubcategory) => ({
@@ -316,10 +402,56 @@ const AdminPanel = () => {
           }
         />
         <TextField
-          label="Image Path"
-          value={newSubcategory.imagePath}
-          disabled
+          label="Nimi eng"
+          value={newSubcategory.name_en}
+          onChange={(e) =>
+            setNewSubcategory((prevSubcategory) => ({
+              ...prevSubcategory,
+              name_en: e.target.value,
+            }))
+          }
         />
+        <TextField
+          label="Nimi swe"
+          value={newSubcategory.name_sv}
+          onChange={(e) =>
+            setNewSubcategory((prevSubcategory) => ({
+              ...prevSubcategory,
+              name_sv: e.target.value,
+            }))
+          }
+        />
+        <TextField
+          label="alaotsikko"
+          value={newSubcategory.alateksti}
+          onChange={(e) =>
+            setNewSubcategory((prevSubcategory) => ({
+              ...prevSubcategory,
+              alateksti: e.target.value,
+            }))
+          }
+        />
+        <TextField
+          label="alaotsikko eng"
+          value={newSubcategory.alateksti_en}
+          onChange={(e) =>
+            setNewSubcategory((prevSubcategory) => ({
+              ...prevSubcategory,
+              alateksti_en: e.target.value,
+            }))
+          }
+        />
+        <TextField
+          label="alaotsikko swe"
+          value={newSubcategory.alateksti_sv}
+          onChange={(e) =>
+            setNewSubcategory((prevSubcategory) => ({
+              ...prevSubcategory,
+              alateksti_sv: e.target.value,
+            }))
+          }
+        />
+        <TextField value={newSubcategory.imagePath} disabled />
         <input type="file" onChange={handleNewImageChange} />
         <Button onClick={handleCreateSubcategory}>Create</Button>
       </div>
@@ -329,10 +461,10 @@ const AdminPanel = () => {
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Image Path</TableCell>
-              <TableCell>Category ID</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell>Nimi</TableCell>
+              <TableCell>Kuvapolku</TableCell>
+
+              <TableCell>Toiminnot</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -346,14 +478,16 @@ const AdminPanel = () => {
                 </TableCell>
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{row.image_path}</TableCell>
-                <TableCell>{row.category_id}</TableCell>
+
                 <TableCell>
-                  <Button onClick={() => handleEdit(row.id)}>Edit</Button>
-                  <Button onClick={() => handleDelete(row.id)}>Delete</Button>
+                  <Button onClick={() => handleEdit(row.id)}>Muokkaa</Button>
+                  <Button onClick={() => handleDelete(row.id)}>Poista</Button>
                   <Button onClick={() => handleEditContent(row)}>
-                    Edit Media
+                    Muokkaa mediaa
                   </Button>
-                  <Button onClick={() => handleAddMedia(row)}>Add Media</Button>
+                  <Button onClick={() => handleAddMedia(row)}>
+                    Lisää mediaa
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -372,8 +506,8 @@ const AdminPanel = () => {
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
-            overflowY: "auto", // Add this line
-            maxHeight: "80vh", // Add this line
+            overflowY: "auto",
+            maxHeight: "80vh",
           }}
         >
           <TextField
@@ -386,7 +520,61 @@ const AdminPanel = () => {
               }))
             }
           />
-
+          <TextField
+            label="Name (English)"
+            value={editSubcategory.name_en}
+            onChange={(e) =>
+              setEditSubcategory((prevSubcategory) => ({
+                ...prevSubcategory,
+                name_en: e.target.value,
+              }))
+            }
+          />
+          <TextField
+            label="Name (Swedish)"
+            value={editSubcategory.name_sv}
+            onChange={(e) =>
+              setEditSubcategory((prevSubcategory) => ({
+                ...prevSubcategory,
+                name_sv: e.target.value,
+              }))
+            }
+          />
+          <TextField
+            label="Subtitle"
+            value={editSubcategory.alateksti}
+            onChange={(e) =>
+              setEditSubcategory((prevSubcategory) => ({
+                ...prevSubcategory,
+                alateksti: e.target.value,
+              }))
+            }
+          />
+          <TextField
+            label="Subtitle (English)"
+            value={editSubcategory.alateksti_en}
+            onChange={(e) =>
+              setEditSubcategory((prevSubcategory) => ({
+                ...prevSubcategory,
+                alateksti_en: e.target.value,
+              }))
+            }
+          />
+          <TextField
+            label="Subtitle (Swedish)"
+            value={editSubcategory.alateksti_sv}
+            onChange={(e) =>
+              setEditSubcategory((prevSubcategory) => ({
+                ...prevSubcategory,
+                alateksti_sv: e.target.value,
+              }))
+            }
+          />
+          <TextField
+            label="Image Path"
+            value={editSubcategory.image_path}
+            disabled
+          />
           <input type="file" onChange={handleImageChange} />
           <Button onClick={handleSaveEdit}>Save</Button>
         </Box>
@@ -403,8 +591,8 @@ const AdminPanel = () => {
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
-            overflowY: "auto", // Add this line
-            maxHeight: "80vh", // Add this line
+            overflowY: "auto",
+            maxHeight: "80vh",
           }}
         >
           <h2>Media</h2>
@@ -442,14 +630,60 @@ const AdminPanel = () => {
           ))}
           <TextField
             label="Content Text"
-            name="contenttext"
-            value={updatedContentText || selectedContentText[0]?.text || ""}
-            onChange={handleContentTextChange}
+            name="text"
+            value={
+              updatedContentText.text || selectedContentText[0]?.text || ""
+            }
+            onChange={(e) =>
+              setUpdatedContentText((prevUpdatedText) => ({
+                ...prevUpdatedText,
+                text: e.target.value,
+              }))
+            }
             multiline
             rows={20} // Adjust the number of rows as needed
             variant="outlined"
             fullWidth
           />
+          <TextField
+            label="Content Text (English)"
+            name="text_en"
+            value={
+              updatedContentText.text_en ||
+              selectedContentText[0]?.text_en ||
+              ""
+            }
+            onChange={(e) =>
+              setUpdatedContentText((prevUpdatedText) => ({
+                ...prevUpdatedText,
+                text_en: e.target.value,
+              }))
+            }
+            multiline
+            rows={20} // Adjust the number of rows as needed
+            variant="outlined"
+            fullWidth
+          />
+          <TextField
+            label="Content Text (Swedish)"
+            name="text_sv"
+            value={
+              updatedContentText.text_sv ||
+              selectedContentText[0]?.text_sv ||
+              ""
+            }
+            onChange={(e) =>
+              setUpdatedContentText((prevUpdatedText) => ({
+                ...prevUpdatedText,
+                text_sv: e.target.value,
+              }))
+            }
+            multiline
+            rows={20} // Adjust the number of rows as needed
+            variant="outlined"
+            fullWidth
+          />
+
           <Button
             onClick={() => handleSaveEditContentText(selectedSubcategory)}
           >
@@ -469,8 +703,8 @@ const AdminPanel = () => {
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
-            overflowY: "auto", // Add this line
-            maxHeight: "80vh", // Add this line
+            overflowY: "auto",
+            maxHeight: "80vh",
           }}
         >
           <h2>Add New Media</h2>

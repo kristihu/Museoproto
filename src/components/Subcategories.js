@@ -1,77 +1,101 @@
 import React from "react";
 import { Grid, Box, Typography } from "@mui/material";
 
-const Subcategories = ({ subcategories, onSubcategoryClick }) => {
+const Subcategories = ({
+  subcategories,
+  onSubcategoryClick,
+  lastCategoryId,
+  categories,
+  selectedCategory,
+}) => {
+  console.log("Categories:", categories);
+  console.log("Last Category ID:", lastCategoryId);
+  const category = categories.find((cat) => cat.id === lastCategoryId);
+  console.log("title", lastCategoryId);
   return (
-    <div style={{ height: "100vh", width: "100vw" }}>
+    <div>
       <Typography
         variant="h3"
         align="center"
         sx={{
+          fontSize: "90px",
           fontFamily: "Montserrat",
           fontStyle: "italic",
           fontWeight: 600,
           marginTop: "110px",
-          marginBottom: "70px",
+          color: "rgb(184, 38, 80)",
         }}
       >
-        Title Here
+        {selectedCategory}
       </Typography>
       <Grid
         container
-        style={{
-          marginLeft: "311px",
-          maxWidth: "60%",
+        sx={{
           flexWrap: "wrap",
+          marginTop: "70px",
+          marginLeft: "16.5%",
         }}
         justifyContent="center"
         alignItems="center"
-        spacing={8}
+        columnSpacing={-50}
       >
         {subcategories.map((subcategory) => (
-          <Grid item xs={3} key={subcategory.id}>
+          <Grid
+            item
+            xs={3}
+            key={subcategory.id}
+            sx={{
+              width: "240px",
+              height: "164px",
+              marginBottom: "60px",
+              marginLeft: "-40px",
+            }}
+          >
             <Box
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
+                alignItems: "flex-start", // Align text to the left
                 justifyContent: "center",
-                height: "100%",
-                textAlign: "center",
-                marginTop: "-30px",
+                textAlign: "left",
+                marginTop: "-0px",
+                marginBottom: "144px",
               }}
             >
-              <div
+              <img
+                src={`http://localhost:3001${subcategory.image_path}`}
+                alt={subcategory.name}
                 style={{
                   width: "240px",
                   height: "164px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow: "hidden",
+                  objectFit: "cover",
+                  boxShadow: "0px 0px 10px 5px rgba(0, 0, 0, 0.5)",
                 }}
-              >
-                <img
-                  src={`http://localhost:3001${subcategory.image_path}`}
-                  alt={subcategory.name}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                  onClick={() => onSubcategoryClick(subcategory.id)}
-                />
-              </div>
+                onClick={() => onSubcategoryClick(subcategory.id)}
+              />
+
               <Typography
                 variant="subtitle1"
-                align="center"
                 sx={{
                   fontFamily: "Montserrat",
                   fontStyle: "italic",
-                  fontWeight: 700,
+                  fontWeight: 800, // boldimmaksi
+                  marginLeft: "0px", // Add left margin for better alignment
                 }}
               >
                 {subcategory.name}
+              </Typography>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontFamily: "Montserrat",
+                  fontSize: "12px",
+                  fontWeight: 500, // boldimmaksi
+                  marginLeft: "0px",
+                  lineHeight: "0.95", // Add left margin for better alignment
+                }}
+              >
+                {subcategory.alateksti}
               </Typography>
             </Box>
           </Grid>

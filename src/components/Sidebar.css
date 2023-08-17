@@ -1,9 +1,28 @@
 .sidebar {
-  width: 230px; /* Adjust this to the width you want for your sidebar */
+  width: 230px;
   position: fixed;
-  right: 0; /* Position it on the right side */
+  right: 0;
   top: 0;
   bottom: 0;
-  background: #f0f0f0; /* Adjust this to your desired background color */
+  background: rgb(0, 71, 105);
   overflow: auto;
+}
+
+.custom-icon-button {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  margin: 18px 50px 25px;
+}
+
+.custom-icon-button img {
+  width: 100%;
+  height: 100%;
 }

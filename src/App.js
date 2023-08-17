@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import io from "socket.io-client";
 import Home from "./Home";
 import AdminPanel from "./AdminPanel";
+import { LanguageProvider } from "./components/LanguageContext"; // Make sure the correct path is used
 
 const App = () => {
   const [socket, setSocket] = useState(null);
@@ -16,10 +17,12 @@ const App = () => {
 
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Home socket={socket} />} />
-        <Route path="/admin" element={<AdminPanel />} />
-      </Routes>
+      <LanguageProvider>
+        <Routes>
+          <Route path="/" element={<Home socket={socket} />} />
+          <Route path="/admin" element={<AdminPanel />} />
+        </Routes>
+      </LanguageProvider>
     </Router>
   );
 };

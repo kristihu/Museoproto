@@ -22,31 +22,48 @@ function ImageCarousel({ images, clickedImageIndex, togglePause }) {
   const [current, setCurrent] = useState(0);
   const [previous, setPrevious] = useState(null);
 
+  const filteredImages = images.filter((image) => image !== null);
+
   useEffect(() => {
     let interval = null;
+
     if (!togglePause) {
       interval = setInterval(() => {
         setPrevious(current);
-        setCurrent((current + 1) % images.length);
+
+        let nextImageIndex = (current + 1) % images.length;
+
+        // Skip images with null image_path
+        while (
+          images[nextImageIndex] === null ||
+          images[nextImageIndex].image_path === null
+        ) {
+          nextImageIndex = (nextImageIndex + 1) % images.length;
+        }
+
+        setCurrent(nextImageIndex);
       }, 6000);
+    } else {
+      clearInterval(interval);
     }
+
     return () => clearInterval(interval);
-  }, [current, images.length, togglePause]);
+  }, [current, images, togglePause]);
 
   useEffect(() => {
     if (clickedImageIndex !== null) {
-      setPrevious(current);
+      console.log(images, "images??");
+      setPrevious(clickedImageIndex);
       setCurrent(clickedImageIndex);
     }
-  }, [clickedImageIndex, current]);
+  }, [clickedImageIndex, images]);
 
   return (
     <div style={{ position: "relative", height: "100vh", overflow: "hidden" }}>
       <AnimatePresence initial={false}>
         {previous !== null && (
-          <motion.img
-            key={previous.id}
-            src={`http://localhost:3001${images[previous]}`}
+          <motion.div
+            key={`current-${current}`}
             variants={variants}
             initial="enter"
             exit="exit"
@@ -54,28 +71,51 @@ function ImageCarousel({ images, clickedImageIndex, togglePause }) {
               position: "absolute",
               width: "100%",
               height: "100%",
-              objectFit: "cover",
-              objectPosition: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
             }}
-          />
+          >
+            <img
+              src={`http://localhost:3001${images[previous]}`}
+              alt=""
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                width: "auto",
+                height: "auto",
+              }}
+            />
+          </motion.div>
         )}
-        <motion.img
+        <motion.div
           key={current}
-          src={`http://localhost:3001${images[current]}`}
           variants={variants}
           initial="enter"
           animate="center"
-          transition={{
-            opacity: { duration: 1 },
-          }}
+          exit="exit"
           style={{
             position: "absolute",
             width: "100%",
             height: "100%",
-            objectFit: "cover",
-            objectPosition: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            overflow: "hidden",
           }}
-        />
+        >
+          <img
+            src={`http://localhost:3001${images[current]}`}
+            alt=""
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              width: "auto",
+              height: "auto",
+            }}
+          />
+        </motion.div>
       </AnimatePresence>
     </div>
   );

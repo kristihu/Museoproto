@@ -2,12 +2,19 @@ import * as React from "react";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { useLanguage } from "./LanguageContext";
 
-const Categories = ({ categories, onCategoryClick }) => {
+const Categories = ({
+  categories,
+  onCategoryClick,
+  selectedTitle,
+  selectedSubTitle,
+}) => {
+  const { selectedLanguage } = useLanguage();
+
   return (
     <div
       style={{
-        height: "calc(100vh - 112px)",
         marginTop: "112px",
         marginBottom: "162px",
         overflow: "hidden",
@@ -20,14 +27,31 @@ const Categories = ({ categories, onCategoryClick }) => {
             component="h1"
             align="center"
             sx={{
-              fontSize: "64px",
-              marginBottom: "40px",
+              fontSize: "90px",
+              marginBottom: "1px",
               fontFamily: "Montserrat",
               fontStyle: "italic",
               fontWeight: 600,
+              color: "rgb(184, 38, 80)",
             }}
           >
-            Esityksiä ennen ja nyt
+            {selectedTitle}
+          </Typography>
+          <Typography
+            variant="h1"
+            component="h1"
+            align="center"
+            sx={{
+              fontSize: "50px",
+              marginBottom: "0px",
+              marginLeft: "-21px",
+              fontFamily: "Montserrat",
+              fontStyle: "italic",
+              fontWeight: 600,
+              color: "rgb(184, 38, 80)",
+            }}
+          >
+            {selectedSubTitle}
           </Typography>
         </Grid>
         <Grid item xs={12}>
@@ -43,6 +67,7 @@ const Categories = ({ categories, onCategoryClick }) => {
                     alignItems: "center",
                     height: "100%",
                     position: "relative",
+                    boxShadow: "0px 0px 10px 5px rgba(0, 0, 0, 0.5)",
                   }}
                 >
                   <Typography
@@ -89,6 +114,7 @@ const Categories = ({ categories, onCategoryClick }) => {
                     alignItems: "center",
                     height: "100%",
                     position: "relative",
+                    boxShadow: "0px 0px 10px 5px rgba(0, 0, 0, 0.5)",
                   }}
                 >
                   <Typography
@@ -101,7 +127,7 @@ const Categories = ({ categories, onCategoryClick }) => {
                       left: "50%",
                       transform: "translateX(-50%)",
                       color: "white",
-                      padding: "8px",
+
                       margin: 0,
                       pointerEvents: "none", // Ignore pointer events
                       fontFamily: "Montserrat",

@@ -4,6 +4,7 @@ import Categories from "./components/Categories";
 import Subcategories from "./components/Subcategories";
 import Content from "./components/Content";
 import Imagecarousel from "./components/Imagecarousel";
+import { useLanguage } from "./components/LanguageContext";
 
 import "./App.css";
 import Sidebar from "./components/Sidebar";
@@ -22,17 +23,25 @@ const Home = ({ socket }) => {
   const [togglePause, setTogglePause] = useState(false);
   const [contenttext, setContenttext] = useState(null);
   const [showAuthors, setShowAuthors] = useState(false);
+  const [authors, setAuthors] = useState([]);
+  const [subTitle, setSubTitle] = useState();
+  const [subTitle2, setSubTitle2] = useState();
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedTitle, setSelectedTitle] = useState("");
+  const [selectedSubTitle, setSelectedSubTitle] = useState("");
 
   const query = useQuery();
   const isProjector = query.get("projector") === "true";
+  const { selectedLanguage } = useLanguage();
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.emit("initialFetch");
+    socket.emit("initialFetch", selectedLanguage);
 
     socket.on("displayCategories", (data) => {
       setCategories(data);
+
       setSubcategories([]);
       setContenttext([]);
     });
@@ -52,10 +61,23 @@ const Home = ({ socket }) => {
       setClickedImageIndex(null);
     });
 
+    socket.on("displayTitle", (title) => {
+      setSelectedTitle(title);
+    });
+    socket.on("displaySubtitle", (subtitle) => {
+      setSelectedSubTitle(subtitle);
+    });
+
     socket.on("displayContent", (data) => {
+      console.log(data, "datatata");
       setSubcategories([]);
       setContent(data.media);
+      setAuthors(data.authors);
       setContenttext(data.contenttext);
+      setSubTitle(data.subTitle);
+      setSubTitle2(data.subTitle2);
+
+      console.log(data.subTitle, "auth");
       if (isProjector) {
         const videoItem = data.media.find((item) => item.video_path);
         if (videoItem) {
@@ -70,8 +92,10 @@ const Home = ({ socket }) => {
 
     socket.on("displayImageAtIndex", ({ index, images }) => {
       setClickedImageIndex(index);
+
       if (isProjector) {
         const imagePaths = images.map((image) => image.image_path);
+        console.log(imagePaths, "imagepaths");
         setImages(imagePaths);
         setCarouselMode(true);
       }
@@ -103,7 +127,6 @@ const Home = ({ socket }) => {
     socket.on("carouselToggled", () => {
       setTogglePause((prevState) => !prevState);
     });
-
     return () => {
       socket.off("displayCategories");
       socket.off("displaySubcategories");
@@ -114,54 +137,72 @@ const Home = ({ socket }) => {
       socket.off("resetProjector");
       socket.off("displayCategoriesOnHome");
       socket.off("carouselToggled");
+      socket.off("displaySubtitle");
+      socket.off("displayTitle");
     };
-  }, [socket, isProjector]);
+  }, [socket, isProjector, selectedLanguage]);
+
   const handleCategoryClick = (categoryId) => {
+    setSelectedCategory(categories[categoryId - 1].name);
     setLastCategoryId(categoryId);
-    socket.emit("categoryClicked", categoryId);
+    socket.emit("categoryClicked", {
+      categoryId: categoryId,
+      selectedLanguage: selectedLanguage,
+    });
+  };
+
+  const handlePlayToggle = () => {
+    setTogglePause((prevState) => !prevState); // Toggle the state
+    socket.emit("toggleCarousel"); // Emit the event to the backend
   };
 
   const handleSubcategoryClick = (subcategoryId) => {
-    socket.emit("subcategoryClicked", subcategoryId);
+    socket.emit("subcategoryClicked", { subcategoryId, selectedLanguage });
     socket.emit("subcategoryChanged");
   };
-
   const handleBackClick = () => {
     if (showAuthors) {
       setShowAuthors(false);
     } else if (content.length > 0) {
       socket.emit("categoryClicked", lastCategoryId);
-      socket.emit("backClicked", lastCategoryId);
+      socket.emit("backClicked", {
+        categoryId: lastCategoryId,
+        selectedLanguage,
+      });
     } else if (subcategories.length > 0) {
-      socket.emit("initialFetch");
+      socket.emit("backClicked", selectedLanguage);
+      socket.emit("initialFetch", selectedLanguage);
     }
   };
 
   const handleHomeClick = () => {
     setShowAuthors(false);
     socket.emit("initialFetch");
-    socket.emit("homeClicked");
+    socket.emit("homeClicked", selectedLanguage);
   };
 
   const handleImageClick = (index) => {
     const selectedItem = content[index];
-
+    console.log(selectedItem, "asdasdasdasdasdasdasdasd");
     if (isProjector) {
       if (selectedItem.video_path) {
         socket.emit("playVideo", selectedItem.video_path);
       } else {
-        socket.emit("imageClicked", content[0]?.subcategory_id, index);
+        const imagePaths = images.map((item) => item.image_path);
+
+        setImages(imagePaths);
+        setCarouselMode(true);
       }
     } else {
       socket.emit("imageClicked", content[0]?.subcategory_id, index);
+      handleToggleClick();
       setCarouselMode(true);
     }
   };
 
   const handleToggleClick = () => {
-    socket.emit("toggleCarousel");
+    socket.emit("toggleCarousel", togglePause); // Pass the current togglePause state
   };
-
   const handleTouchMove = (event) => {
     event.preventDefault();
   };
@@ -212,18 +253,23 @@ const Home = ({ socket }) => {
             <Sidebar
               handleBackClick={handleBackClick}
               handleHomeClick={handleHomeClick}
+              handlePlayToggle={handlePlayToggle}
             />
           </div>
         )}
         <div className="content">
           {categories.length > 0 && (
             <Categories
+              selectedTitle={selectedTitle}
+              selectedSubTitle={selectedSubTitle}
               categories={categories}
               onCategoryClick={handleCategoryClick}
             />
           )}
           {subcategories.length > 0 && (
             <Subcategories
+              selectedCategory={selectedCategory}
+              categories={categories}
               subcategories={subcategories}
               onSubcategoryClick={handleSubcategoryClick}
             />
@@ -234,10 +280,14 @@ const Home = ({ socket }) => {
                 content={content}
                 contenttext={contenttext}
                 onImageClick={handleImageClick}
+                clickedImageIndex={clickedImageIndex}
                 handleToggleClick={handleToggleClick}
                 showAuthors={showAuthors}
                 setShowAuthors={setShowAuthors}
+                authors={authors}
                 socket={socket}
+                subTitle={subTitle}
+                subTitle2={subTitle2}
               />
             </>
           )}

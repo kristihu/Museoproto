@@ -42,24 +42,26 @@ body,
   position: relative;
   width: calc(100% - 230px); /* Subtract the width of the sidebar */
   display: flex;
-  align-items: center;
-  justify-content: center;
 
+  height: 100vh;
+  background-image: url("./images/testi.jpg");
   background-size: cover;
   z-index: 1;
 }
 
 .content::before {
-  z-index: -1;
+  z-index: -2;
   content: "";
   position: absolute;
   top: 0px;
   right: 0px;
   bottom: 0px;
   left: 0px;
-  background-color: rgba(0, 71, 105, 0.8);
+
+  background-color: rgba(164, 216, 222, 0.5);
+  background-size: cover;
 }
 
 #root {
-  color: rgb(164, 216, 222); /* Replace with your desired font color */
+  color: black; /* Replace with your desired font color */
 }

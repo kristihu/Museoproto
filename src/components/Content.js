@@ -31,6 +31,8 @@ const Content = ({
   const [selectedImage, setSelectedImage] = useState(null);
   const [isVertical, setIsVertical] = useState(false);
 
+  console.log(authors, "toimiix");
+
   useEffect(() => {
     // Calculate aspect ratio when the component mounts
     const heroImage = new Image();
@@ -92,64 +94,175 @@ const Content = ({
     ));
   };
 
+  const formatAuthorsText = (text) => {
+    const lines = text.split("\n");
+    const formattedLines = lines.map((line, index) => {
+      const colonIndex = line.indexOf(":");
+      if (colonIndex !== -1) {
+        const boldPart = line.substring(0, colonIndex).trim();
+        const normalPart = line.substring(colonIndex + 1).trim();
+        return (
+          <React.Fragment key={index}>
+            <Typography
+              component="span"
+              variant="body1"
+              sx={{
+                fontFamily: "Montserrat",
+                fontWeight: "bold",
+              }}
+            >
+              {boldPart}:{" "}
+            </Typography>
+            <span
+              sx={{
+                fontFamily: "Montserrat",
+                fontWeight: 500,
+              }}
+            >
+              {normalPart}
+            </span>
+            <br />
+          </React.Fragment>
+        );
+      } else {
+        return (
+          <React.Fragment key={index}>
+            {line}
+            <br />
+          </React.Fragment>
+        );
+      }
+    });
+
+    return formattedLines;
+  };
+
+  const formatLahteet = (text) => {
+    const lines = text.split("\n");
+    const formattedLines = lines.map((line, index) => (
+      <Typography
+        key={index}
+        component="span"
+        variant="body1"
+        sx={{
+          fontFamily: "Montserrat",
+          fontWeight: index % 2 === 0 ? "bold" : 500,
+        }}
+      >
+        {line}
+        <br />
+      </Typography>
+    ));
+
+    return formattedLines;
+  };
+
   if (showAuthors) {
     // Render the authors view here
     return (
-      <div style={{ marginLeft: "100px", marginTop: "50px" }}>
-        <Grid container spacing={12}>
-          {/* First column */}
-          <Grid item xs={6}>
-            <Typography
-              variant="h4"
-              sx={{
-                fontSize: "40px",
-                fontFamily: "Montserrat",
-                fontWeight: 600,
-                fontStyle: "italic",
-                color: "rgba(184,38,80)",
-              }}
-            >
-              Esityksen tekijät
-            </Typography>
-            <List>
-              {authors.map((author) => (
-                <ListItem key={author.id}>
-                  <ListItemText
-                    primary={author.esiintyja}
-                    secondary={author.hahmo}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Grid>
-          {/* Second column */}
-          <Grid item xs={6}>
-            <Typography
-              variant="h4"
-              sx={{
-                marginLeft: "-20px",
-                fontSize: "40px",
-                fontFamily: "Montserrat",
-                fontWeight: 600,
-                fontStyle: "italic",
-                color: "rgba(184,38,80)",
-              }}
-            >
-              Lähteet
-            </Typography>
-            {authors.some((author) => author.rooli) ? (
-              <Typography variant="paragraph">
-                {authors.find((author) => author.rooli)?.rooli}
+      <Grid container spacing={22}>
+        {/* First column */}
+        <Grid item xs={6}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontSize: "40px",
+              fontFamily: "Montserrat",
+              fontWeight: 600,
+              fontStyle: "italic",
+              color: "rgba(184,38,80)",
+              marginLeft: "80px",
+            }}
+          >
+            Esityksen tekijät
+          </Typography>
+          <Grid
+            container
+            direction="row"
+            spacing={25}
+            sx={{
+              marginLeft: "-120px",
+            }}
+          >
+            <Grid item>
+              <Typography
+                variant="body1"
+                component="span"
+                gutterBottom
+                sx={{
+                  marginTop: "22px",
+                  fontSize: "15px",
+                  lineHeight: "21px",
+                  fontFamily: "Montserrat",
+                  fontWeight: 500,
+                }}
+              >
+                {authors && formatLahteet(authors[0].esiintyjat)}
               </Typography>
-            ) : (
-              <Typography variant="paragraph">No rooli found</Typography>
-            )}
+            </Grid>
+            <Grid item xs={6}>
+              <div
+                style={{
+                  height: "1000px",
+                  width: "460px",
+                  overflow: "auto",
+                  paddingRight: "10px",
+                }}
+              >
+                <Typography
+                  variant="body1"
+                  gutterBottom
+                  component="span"
+                  sx={{
+                    fontSize: "13px",
+                    lineHeight: "1px",
+                    fontFamily: "Montserrat",
+                    fontWeight: 500,
+                  }}
+                >
+                  {authors && formatAuthorsText(authors[0].tekijat)}
+                </Typography>
+              </div>
+            </Grid>
           </Grid>
         </Grid>
-      </div>
+        {/* Second column */}
+        <Grid item xs={6}>
+          <Typography
+            variant="h4"
+            sx={{
+              marginLeft: "-20px",
+              fontSize: "40px",
+              fontFamily: "Montserrat",
+              fontWeight: 600,
+              fontStyle: "italic",
+              color: "rgba(184,38,80)",
+            }}
+          >
+            Lähteet
+          </Typography>
+          <Typography
+            variant="subtitle1"
+            component="span"
+            gutterBottom
+            sx={{
+              marginTop: "22px",
+              fontSize: "11px",
+              lineHeight: "21px",
+              fontFamily: "Montserrat",
+              fontWeight: 500,
+            }}
+          >
+            {authors && formatText(authors[0].lahteet)}
+          </Typography>
+        </Grid>
+      </Grid>
     );
   }
   if (!contenttext || contenttext.length === 0) {
+    return <></>;
+  }
+  if (!authors || authors.length === 0) {
     return <></>;
   }
 

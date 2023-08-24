@@ -8,7 +8,7 @@ const Subcategories = ({
   categories,
   selectedCategory,
 }) => {
-  console.log("Categories:", categories);
+  console.log("Categories:", subcategories);
   console.log("Last Category ID:", lastCategoryId);
   const category = categories.find((cat) => cat.id === lastCategoryId);
   console.log("title", lastCategoryId);

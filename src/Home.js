@@ -44,6 +44,8 @@ const Home = ({ socket }) => {
 
       setSubcategories([]);
       setContenttext([]);
+      setAuthors([]);
+      setShowAuthors(false);
     });
 
     socket.on("displaySubcategories", (data) => {
@@ -72,7 +74,7 @@ const Home = ({ socket }) => {
       console.log(data, "datatata");
       setSubcategories([]);
       setContent(data.media);
-      setAuthors(data.authors);
+      setAuthors(data.lahteet);
       setContenttext(data.contenttext);
       setSubTitle(data.subTitle);
       setSubTitle2(data.subTitle2);
@@ -152,8 +154,8 @@ const Home = ({ socket }) => {
   };
 
   const handlePlayToggle = () => {
-    setTogglePause((prevState) => !prevState); // Toggle the state
-    socket.emit("toggleCarousel"); // Emit the event to the backend
+    setTogglePause((prevState) => !prevState);
+    socket.emit("toggleCarousel");
   };
 
   const handleSubcategoryClick = (subcategoryId) => {
@@ -201,7 +203,7 @@ const Home = ({ socket }) => {
   };
 
   const handleToggleClick = () => {
-    socket.emit("toggleCarousel", togglePause); // Pass the current togglePause state
+    socket.emit("toggleCarousel", togglePause);
   };
   const handleTouchMove = (event) => {
     event.preventDefault();

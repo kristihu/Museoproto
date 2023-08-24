@@ -28,13 +28,16 @@ import {
   createContentText,
   deleteSubcategory,
   fetchSubcategoryDetails,
+  deleteMedia,
 } from "./components/api";
+import LahteetModal from "./components/LahteetModal";
 
 const AdminPanel = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [subcategories, setSubcategories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [lahteetModal, setLahteetModal] = useState(false);
   const [editSubcategory, setEditSubcategory] = useState({
     id: null,
     name: "",
@@ -60,8 +63,7 @@ const AdminPanel = () => {
   const [mediaModalOpen, setMediaModalOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState([]);
   const [selectedContentText, setSelectedContentText] = useState([]);
-  const [updatedImageText, setUpdatedImageText] = useState([]);
-  const [updatedImageTextBold, setUpdatedImageTextBold] = useState([]);
+
   const [updatedContentText, setUpdatedContentText] = useState({
     text: "",
     text_en: "",
@@ -71,11 +73,25 @@ const AdminPanel = () => {
   const [newMedia, setNewMedia] = useState({
     imagetext: "",
     imagetextbold: "",
+    imagetext_en: "", // Add imagetext_en field
+    imagetext_sv: "", // Add imagetext_sv field
+    imagetextbold_en: "", // Add imagetextbold_en field
+    imagetextbold_sv: "", // Add imagetextbold_sv field
     selectedMediaFile: null,
     mediaType: "image", // or video
   });
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
-  const [subcategory, setSubcategory] = useState(null);
+
+  const [formFields, setFormFields] = useState({
+    imagetext: "",
+    imagetextbold: "",
+    imagetext_en: "",
+    imagetext_sv: "",
+    imagetextbold_en: "",
+    imagetextbold_sv: "",
+    selectedMediaFile: null,
+    mediaType: "image", // or video
+  });
 
   useEffect(() => {
     fetchCategories()
@@ -95,16 +111,15 @@ const AdminPanel = () => {
     }
   }, [selectedCategory]);
 
-  const fetchSubcategoryWithLanguage = (subcategoryId, language) => {
-    return fetchSubcategories(subcategoryId, language)
-      .then((response) => response.data[0])
-      .catch((error) => {
-        console.error(
-          `Error fetching subcategory details (${language}):`,
-          error
-        );
+  useEffect(() => {
+    if (selectedContentText.length > 0) {
+      setUpdatedContentText({
+        text: selectedContentText[0].text,
+        text_en: selectedContentText[0].text_en,
+        text_sv: selectedContentText[0].text_sv,
       });
-  };
+    }
+  }, [selectedContentText]);
 
   const handleEdit = (subcategoryId) => {
     fetchSubcategoryDetails(subcategoryId)
@@ -140,8 +155,22 @@ const AdminPanel = () => {
 
         setSelectedMedia(media);
         setSelectedContentText(contentText);
-        setUpdatedImageText(media.map((m) => m.imagetext));
-        setUpdatedImageTextBold(media.map((m) => m.imagetextbold));
+
+        // Initialize the form fields for each media item
+        console.log(media, "media");
+        const initialFormFields = {};
+        media.forEach((mediaItem) => {
+          initialFormFields[mediaItem.id] = {
+            imagetext: mediaItem.imagetext || "",
+            imagetextbold: mediaItem.imagetextbold || "",
+            imagetext_en: mediaItem.imagetext_en || "",
+            imagetext_sv: mediaItem.imagetext_sv || "",
+            imagetextbold_en: mediaItem.imagetextbold_en || "",
+            imagetextbold_sv: mediaItem.imagetextbold_sv || "",
+          };
+        });
+
+        setFormFields(initialFormFields);
         setMediaModalOpen(true);
       })
       .catch((error) => {
@@ -151,6 +180,7 @@ const AdminPanel = () => {
         );
       });
   };
+
   const handleSaveEditContentText = (id) => {
     const updatedText = {
       text: updatedContentText.text,
@@ -176,6 +206,7 @@ const AdminPanel = () => {
       // If content text already exists, update it
       updateContentText(id, updatedText)
         .then(() => {
+          console.log(updatedText, "tekstiuus");
           fetchContentText(id)
             .then((response) => setSelectedContentText([response.data]))
             .catch((error) => {
@@ -254,17 +285,36 @@ const AdminPanel = () => {
       });
   };
 
-  const handleImageTextChange = (event, index) => {
-    const { name, value } = event.target;
-    if (name === "imagetext") {
-      const updatedTexts = [...updatedImageText];
-      updatedTexts[index] = value;
-      setUpdatedImageText(updatedTexts);
-    } else if (name === "imagetextbold") {
-      const updatedTextsBold = [...updatedImageTextBold];
-      updatedTextsBold[index] = value;
-      setUpdatedImageTextBold(updatedTextsBold);
+  const handleDeleteMedia = (subcategoryId, mediaId) => {
+    console.log("Deleting media:", subcategoryId, mediaId);
+
+    const shouldDelete = window.confirm(
+      "Are you sure you want to delete this media?"
+    );
+
+    if (shouldDelete) {
+      deleteMedia(subcategoryId, mediaId)
+        .then(() => {
+          console.log("Media deleted successfully:", mediaId);
+          setSelectedMedia((prevState) =>
+            prevState.filter((media) => media.id !== mediaId)
+          );
+        })
+        .catch((error) => {
+          console.error("Error deleting media:", error);
+        });
     }
+  };
+
+  const handleImageTextChange = (event, mediaId) => {
+    const { name, value } = event.target;
+    setFormFields((prevFields) => ({
+      ...prevFields,
+      [mediaId]: {
+        ...prevFields[mediaId],
+        [name]: value,
+      },
+    }));
   };
 
   const handleAddMedia = (subcategoryId) => {
@@ -272,11 +322,19 @@ const AdminPanel = () => {
     setAddMediaModal(true);
   };
 
+  const handleCloseLahteetModal = () => {
+    setLahteetModal(false);
+  };
+
   const handleCreateMedia = () => {
     const formData = new FormData();
     formData.append("file", newMedia.selectedMediaFile);
     formData.append("imagetext", newMedia.imagetext);
     formData.append("imagetextbold", newMedia.imagetextbold);
+    formData.append("imagetext_en", newMedia.imagetext_en); // Add imagetext_en field
+    formData.append("imagetext_sv", newMedia.imagetext_sv); // Add imagetext_sv field
+    formData.append("imagetextbold_en", newMedia.imagetextbold_en); // Add imagetextbold_en field
+    formData.append("imagetextbold_sv", newMedia.imagetextbold_sv); // Add imagetextbold_sv field
     formData.append("type", newMedia.mediaType);
 
     createMedia(selectedSubcategory.id, formData)
@@ -285,6 +343,10 @@ const AdminPanel = () => {
         setNewMedia({
           imagetext: "",
           imagetextbold: "",
+          imagetext_en: "", // Reset the imagetext_en field
+          imagetext_sv: "", // Reset the imagetext_sv field
+          imagetextbold_en: "", // Reset the imagetextbold_en field
+          imagetextbold_sv: "", // Reset the imagetextbold_sv field
           selectedMediaFile: null,
           mediaType: "image",
         });
@@ -315,26 +377,32 @@ const AdminPanel = () => {
     const media = updatedMedia[index];
     const formData = new FormData();
 
-    if (selectedMediaImage) {
-      formData.append("file", selectedMediaImage);
-    }
+    // Append updated image text fields
+    formData.append("imagetext", formFields[media.id]?.imagetext);
+    formData.append("imagetextbold", formFields[media.id]?.imagetextbold);
+    formData.append("imagetext_en", formFields[media.id]?.imagetext_en);
+    formData.append("imagetext_sv", formFields[media.id]?.imagetext_sv);
+    formData.append("imagetextbold_en", formFields[media.id]?.imagetextbold_en);
+    formData.append("imagetextbold_sv", formFields[media.id]?.imagetextbold_sv);
 
-    formData.append("imagetext", updatedImageText[index]);
-    formData.append("imagetextbold", updatedImageTextBold[index]);
-
+    // Determine selected media type
     const selectedMediaType = media.video_path ? "video" : "image";
 
     if (selectedMediaType === "image") {
+      if (selectedMediaImage) {
+        formData.append("file", selectedMediaImage);
+      }
       formData.append("image_path", media.image_path);
-    } else {
+    } else if (selectedMediaType === "video") {
+      if (selectedMediaImage) {
+        formData.append("file", selectedMediaImage);
+      }
       formData.append("video_path", media.video_path);
     }
 
     updateMedia(mediaId, formData)
       .then((response) => {
         const updatedMediaData = response.data;
-        media.imagetext = updatedMediaData.imagetext;
-        media.imagetextbold = updatedMediaData.imagetextbold;
         media.image_path = updatedMediaData.image_path;
         media.video_path = updatedMediaData.video_path;
         setSelectedMedia(updatedMedia);
@@ -373,6 +441,12 @@ const AdminPanel = () => {
     }
   };
 
+  const handleLahteet = (subcategoryId) => {
+    console.log(subcategoryId.id, "eipä ollu");
+    setSelectedSubcategory(subcategoryId);
+    setLahteetModal(true); // Open the Lahteet Modal
+  };
+
   return (
     <div
       className="admin-panel"
@@ -390,7 +464,7 @@ const AdminPanel = () => {
       </Select>
 
       <div className="create-subcategory-section">
-        <h2>Lisää uusi alakategoria</h2>
+        <h2>Lisää uusi teos</h2>
         <TextField
           label="Nimi"
           value={newSubcategory.name}
@@ -488,6 +562,7 @@ const AdminPanel = () => {
                   <Button onClick={() => handleAddMedia(row)}>
                     Lisää mediaa
                   </Button>
+                  <Button onClick={() => handleLahteet(row)}>lähteet</Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -587,7 +662,7 @@ const AdminPanel = () => {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: "900px",
+            width: "1600px",
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
@@ -598,42 +673,60 @@ const AdminPanel = () => {
           <h2>Media</h2>
           {selectedMedia.map((media, index) => (
             <div key={media.id}>
-              <p>Title: {media.imagetext}</p>
-              <p>Image Path: {media.image_path}</p>
-              <p>Video Path: {media.video_path}</p>
               <TextField
                 label="Image Text"
                 name="imagetext"
-                value={updatedImageText[index] || ""}
-                onChange={(e) => handleImageTextChange(e, index)}
+                value={formFields[media.id]?.imagetext || ""}
+                onChange={(event) => handleImageTextChange(event, media.id)}
               />
               <TextField
                 label="Image Text Bold"
                 name="imagetextbold"
-                value={updatedImageTextBold[index] || ""}
-                onChange={(e) => handleImageTextChange(e, index)}
+                value={formFields[media.id]?.imagetextbold || ""}
+                onChange={(event) => handleImageTextChange(event, media.id)}
               />
-              {media.video_path && (
-                <video controls>
-                  <source
-                    src={`http://localhost:3001${media.video_path}`}
-                    type="video/mp4"
-                  />
-                  Your browser does not support the video tag.
-                </video>
-              )}
-              <input type="file" onChange={handleMediaImageChange} />
+              <TextField
+                label="Image Text (English)"
+                name="imagetext_en"
+                value={formFields[media.id]?.imagetext_en || ""}
+                onChange={(event) => handleImageTextChange(event, media.id)}
+              />
+              <TextField
+                label="Image Text (Swedish)"
+                name="imagetext_sv"
+                value={formFields[media.id]?.imagetext_sv || ""}
+                onChange={(event) => handleImageTextChange(event, media.id)}
+              />
+              <TextField
+                label="Image Text Bold (English)"
+                name="imagetextbold_en"
+                value={formFields[media.id]?.imagetextbold_en || ""}
+                onChange={(event) => handleImageTextChange(event, media.id)}
+              />
+              <TextField
+                label="Image Text Bold (Swedish)"
+                name="imagetextbold_sv"
+                value={formFields[media.id]?.imagetextbold_sv || ""}
+                onChange={(event) => handleImageTextChange(event, media.id)}
+              />
+              <input
+                type="file"
+                onChange={(event) => handleMediaImageChange(event, media.id)}
+              />
               <Button onClick={() => handleSaveEditMedia(media.id, index)}>
                 Save
+              </Button>
+              <Button
+                onClick={() => handleDeleteMedia(selectedSubcategory, media.id)}
+              >
+                Delete
               </Button>
             </div>
           ))}
           <TextField
-            label="Content Text"
+            label="Leipäteksti"
             name="text"
-            value={
-              updatedContentText.text || selectedContentText[0]?.text || ""
-            }
+            value={updatedContentText.text}
             onChange={(e) =>
               setUpdatedContentText((prevUpdatedText) => ({
                 ...prevUpdatedText,
@@ -641,18 +734,15 @@ const AdminPanel = () => {
               }))
             }
             multiline
-            rows={20} // Adjust the number of rows as needed
+            rows={20}
             variant="outlined"
             fullWidth
           />
+
           <TextField
-            label="Content Text (English)"
+            label="Leipäteksti (English)"
             name="text_en"
-            value={
-              updatedContentText.text_en ||
-              selectedContentText[0]?.text_en ||
-              ""
-            }
+            value={updatedContentText.text_en}
             onChange={(e) =>
               setUpdatedContentText((prevUpdatedText) => ({
                 ...prevUpdatedText,
@@ -660,18 +750,15 @@ const AdminPanel = () => {
               }))
             }
             multiline
-            rows={20} // Adjust the number of rows as needed
+            rows={20}
             variant="outlined"
             fullWidth
           />
+
           <TextField
-            label="Content Text (Swedish)"
+            label="Leipäteksti(Swedish)"
             name="text_sv"
-            value={
-              updatedContentText.text_sv ||
-              selectedContentText[0]?.text_sv ||
-              ""
-            }
+            value={updatedContentText.text_sv}
             onChange={(e) =>
               setUpdatedContentText((prevUpdatedText) => ({
                 ...prevUpdatedText,
@@ -679,7 +766,7 @@ const AdminPanel = () => {
               }))
             }
             multiline
-            rows={20} // Adjust the number of rows as needed
+            rows={20}
             variant="outlined"
             fullWidth
           />
@@ -687,7 +774,7 @@ const AdminPanel = () => {
           <Button
             onClick={() => handleSaveEditContentText(selectedSubcategory)}
           >
-            Save Content Text
+            Tallenna leipätekstit
           </Button>
         </Box>
       </Modal>
@@ -720,6 +807,30 @@ const AdminPanel = () => {
             value={newMedia.imagetextbold}
             onChange={handleAddMediaChange}
           />
+          <TextField
+            label="Image Text (English)"
+            name="imagetext_en"
+            value={newMedia.imagetext_en}
+            onChange={handleAddMediaChange}
+          />
+          <TextField
+            label="Image Text (Swedish)"
+            name="imagetext_sv"
+            value={newMedia.imagetext_sv}
+            onChange={handleAddMediaChange}
+          />
+          <TextField
+            label="Image Text Bold (English)"
+            name="imagetextbold_en"
+            value={newMedia.imagetextbold_en}
+            onChange={handleAddMediaChange}
+          />
+          <TextField
+            label="Image Text Bold (Swedish)"
+            name="imagetextbold_sv"
+            value={newMedia.imagetextbold_sv}
+            onChange={handleAddMediaChange}
+          />
           <Select
             label="Media Type"
             name="mediaType"
@@ -733,6 +844,12 @@ const AdminPanel = () => {
           <Button onClick={handleCreateMedia}>Create</Button>
         </Box>
       </Modal>
+      <LahteetModal
+        open={lahteetModal}
+        onClose={handleCloseLahteetModal}
+        subcatId={selectedSubcategory}
+        selectedSubcategory={selectedSubcategory}
+      />
     </div>
   );
 };

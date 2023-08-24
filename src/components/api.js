@@ -94,12 +94,9 @@ export const updateSubcategory = (subcategory, image) => {
 
 // Update media
 export const updateMedia = (mediaId, formData) => {
-  return axios.put(`http://localhost:3001/media/${mediaId}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  return axios.put(`http://localhost:3001/media/${mediaId}`, formData);
 };
+
 //update content text
 export const updateContentText = async (contenttextId, updatedText) => {
   const { text, text_en, text_sv } = updatedText;
@@ -137,6 +134,12 @@ export const createContentText = (subcategoryId, text) => {
   );
 };
 
+export const createLahteet = (formData) => {
+  return axios.post(`http://localhost:3001/lahteet`, formData, {
+    headers: { "Content-Type": "application/json" },
+  });
+};
+
 // create media
 export const createMedia = (subcategoryId, formData) => {
   console.log(subcategoryId, "HAHHEHEHHE");
@@ -149,4 +152,36 @@ export const createMedia = (subcategoryId, formData) => {
 //delete subcategory and it's media
 export const deleteSubcategory = (subcategoryId) => {
   return axios.delete(`http://localhost:3001/subcategories/${subcategoryId}`);
+};
+
+export const deleteMedia = (subcategoryId, mediaId) => {
+  return axios.delete(
+    `http://localhost:3001/media/${subcategoryId}/${mediaId}`
+  );
+};
+
+export const fetchLahteet = (subcategoryId) => {
+  console.log(subcategoryId, "idddidididiidid");
+  return axios.get(`http://localhost:3001/lahteet/${subcategoryId}`);
+};
+
+export const updateLahteet = (lahteetId, updatedLahteet) => {
+  const { tekijat, esiintyjat, esiintyjat_en, esiintyjat_sv, lahteet } =
+    updatedLahteet;
+
+  return axios.put(
+    `http://localhost:3001/lahteet/${lahteetId}`,
+    {
+      tekijat,
+      esiintyjat,
+      esiintyjat_en,
+      esiintyjat_sv,
+      lahteet,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 };

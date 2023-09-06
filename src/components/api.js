@@ -69,7 +69,10 @@ export const updateSubcategory = (subcategory, image) => {
     subcategory;
 
   const formData = new FormData();
-  formData.append("image", image);
+  if (image) {
+    // Append the new image only if it exists
+    formData.append("image", image);
+  }
 
   return axios
     .post("http://localhost:3001/upload", formData, {
@@ -80,16 +83,63 @@ export const updateSubcategory = (subcategory, image) => {
     .then((response) => {
       const imagePath = response.data.imagePath;
 
-      return axios.put(`http://localhost:3001/subcategories/${id}`, {
+      // Only include image_path in the update if a new image was selected
+      const updateData = {
         name,
         name_en,
         name_sv,
         alateksti,
         alateksti_en,
         alateksti_sv,
-        image_path: imagePath,
-      });
+      };
+
+      if (imagePath) {
+        updateData.image_path = imagePath;
+      }
+
+      return axios.put(`http://localhost:3001/subcategories/${id}`, updateData);
     });
+};
+export const updateSubcategoryWithImagePath = (subcategory, selectedImage) => {
+  const { id, name, name_en, name_sv, alateksti, alateksti_en, alateksti_sv } =
+    subcategory;
+
+  if (selectedImage) {
+    // New image is picked, perform image upload
+    const formData = new FormData();
+    formData.append("image", selectedImage);
+
+    return axios
+      .post("http://localhost:3001/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => {
+        const imagePath = response.data.imagePath;
+
+        return axios.put(`http://localhost:3001/subcategories/${id}`, {
+          name,
+          name_en,
+          name_sv,
+          alateksti,
+          alateksti_en,
+          alateksti_sv,
+          image_path: imagePath,
+        });
+      });
+  } else {
+    // No new image is picked, use the image_path from the input field
+    return axios.put(`http://localhost:3001/subcategories/${id}`, {
+      name,
+      name_en,
+      name_sv,
+      alateksti,
+      alateksti_en,
+      alateksti_sv,
+      image_path: subcategory.image_path, // Use the existing image_path
+    });
+  }
 };
 
 // Update media
@@ -115,16 +165,15 @@ export const updateContentText = async (contenttextId, updatedText) => {
   );
 };
 
-//create content text
 // create content text
 export const createContentText = (subcategoryId, text) => {
-  const { text_en, text_sv } = text; // Extract English and Swedish texts
+  const { text_en, text_sv } = text;
   return axios.post(
     `http://localhost:3001/contenttext/${subcategoryId}`,
     {
-      text: text.text, // Set the Finnish text
-      text_en, // Set the English text
-      text_sv, // Set the Swedish text
+      text: text.text,
+      text_en,
+      text_sv,
     },
     {
       headers: {

@@ -29,6 +29,7 @@ import {
   deleteSubcategory,
   fetchSubcategoryDetails,
   deleteMedia,
+  updateSubcategoryWithImagePath,
 } from "./components/api";
 import LahteetModal from "./components/LahteetModal";
 
@@ -58,6 +59,7 @@ const AdminPanel = () => {
     alateksti: "",
     alateksti_en: "",
     alateksti_sv: "",
+    imagePath: "",
     selectedImage: null,
   });
   const [mediaModalOpen, setMediaModalOpen] = useState(false);
@@ -73,12 +75,12 @@ const AdminPanel = () => {
   const [newMedia, setNewMedia] = useState({
     imagetext: "",
     imagetextbold: "",
-    imagetext_en: "", // Add imagetext_en field
-    imagetext_sv: "", // Add imagetext_sv field
-    imagetextbold_en: "", // Add imagetextbold_en field
-    imagetextbold_sv: "", // Add imagetextbold_sv field
+    imagetext_en: "",
+    imagetext_sv: "",
+    imagetextbold_en: "",
+    imagetextbold_sv: "",
     selectedMediaFile: null,
-    mediaType: "image", // or video
+    mediaType: "image",
   });
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
 
@@ -90,7 +92,7 @@ const AdminPanel = () => {
     imagetextbold_en: "",
     imagetextbold_sv: "",
     selectedMediaFile: null,
-    mediaType: "image", // or video
+    mediaType: "image",
   });
 
   useEffect(() => {
@@ -156,7 +158,6 @@ const AdminPanel = () => {
         setSelectedMedia(media);
         setSelectedContentText(contentText);
 
-        // Initialize the form fields for each media item
         console.log(media, "media");
         const initialFormFields = {};
         media.forEach((mediaItem) => {
@@ -189,7 +190,6 @@ const AdminPanel = () => {
     };
 
     if (selectedContentText.length === 0) {
-      // If there is no content text, create a new one
       createContentText(id, updatedText)
         .then((response) => {
           setSelectedContentText([response.data]);
@@ -203,7 +203,6 @@ const AdminPanel = () => {
           console.error("Error creating content text: ", error);
         });
     } else {
-      // If content text already exists, update it
       updateContentText(id, updatedText)
         .then(() => {
           console.log(updatedText, "tekstiuus");
@@ -264,25 +263,48 @@ const AdminPanel = () => {
   };
 
   const handleSaveEdit = () => {
-    updateSubcategory(editSubcategory, selectedImage)
-      .then((response) => {
-        setSubcategories((prevState) =>
-          prevState.map((subcategory) =>
-            subcategory.id === editSubcategory.id
-              ? {
-                  ...subcategory,
-                  image_path: response.data.imagePath,
-                  name: editSubcategory.name,
-                }
-              : subcategory
-          )
-        );
-        setEditModalOpen(false);
-        setSelectedImage(null);
-      })
-      .catch((error) => {
-        console.error("Error updating subcategory: ", error);
-      });
+    // Check if a new image is picked
+    if (selectedImage) {
+      // New image is picked, perform image upload
+      updateSubcategory(editSubcategory, selectedImage)
+        .then((response) => {
+          setSubcategories((prevState) =>
+            prevState.map((subcategory) =>
+              subcategory.id === editSubcategory.id
+                ? {
+                    ...subcategory,
+                    image_path: response.data.imagePath,
+                    name: editSubcategory.name,
+                  }
+                : subcategory
+            )
+          );
+          setEditModalOpen(false);
+          setSelectedImage(null);
+        })
+        .catch((error) => {
+          console.error("Error updating subcategory: ", error);
+        });
+    } else {
+      // No new image is picked, use the image_path from the input field
+      updateSubcategoryWithImagePath(editSubcategory)
+        .then((response) => {
+          setSubcategories((prevState) =>
+            prevState.map((subcategory) =>
+              subcategory.id === editSubcategory.id
+                ? {
+                    ...subcategory,
+                    name: editSubcategory.name,
+                  }
+                : subcategory
+            )
+          );
+          setEditModalOpen(false);
+        })
+        .catch((error) => {
+          console.error("Error updating subcategory: ", error);
+        });
+    }
   };
 
   const handleDeleteMedia = (subcategoryId, mediaId) => {
@@ -331,10 +353,10 @@ const AdminPanel = () => {
     formData.append("file", newMedia.selectedMediaFile);
     formData.append("imagetext", newMedia.imagetext);
     formData.append("imagetextbold", newMedia.imagetextbold);
-    formData.append("imagetext_en", newMedia.imagetext_en); // Add imagetext_en field
-    formData.append("imagetext_sv", newMedia.imagetext_sv); // Add imagetext_sv field
-    formData.append("imagetextbold_en", newMedia.imagetextbold_en); // Add imagetextbold_en field
-    formData.append("imagetextbold_sv", newMedia.imagetextbold_sv); // Add imagetextbold_sv field
+    formData.append("imagetext_en", newMedia.imagetext_en);
+    formData.append("imagetext_sv", newMedia.imagetext_sv);
+    formData.append("imagetextbold_en", newMedia.imagetextbold_en);
+    formData.append("imagetextbold_sv", newMedia.imagetextbold_sv);
     formData.append("type", newMedia.mediaType);
 
     createMedia(selectedSubcategory.id, formData)
@@ -343,10 +365,10 @@ const AdminPanel = () => {
         setNewMedia({
           imagetext: "",
           imagetextbold: "",
-          imagetext_en: "", // Reset the imagetext_en field
-          imagetext_sv: "", // Reset the imagetext_sv field
-          imagetextbold_en: "", // Reset the imagetextbold_en field
-          imagetextbold_sv: "", // Reset the imagetextbold_sv field
+          imagetext_en: "",
+          imagetext_sv: "",
+          imagetextbold_en: "",
+          imagetextbold_sv: "",
           selectedMediaFile: null,
           mediaType: "image",
         });
@@ -377,7 +399,6 @@ const AdminPanel = () => {
     const media = updatedMedia[index];
     const formData = new FormData();
 
-    // Append updated image text fields
     formData.append("imagetext", formFields[media.id]?.imagetext);
     formData.append("imagetextbold", formFields[media.id]?.imagetextbold);
     formData.append("imagetext_en", formFields[media.id]?.imagetext_en);
@@ -385,7 +406,6 @@ const AdminPanel = () => {
     formData.append("imagetextbold_en", formFields[media.id]?.imagetextbold_en);
     formData.append("imagetextbold_sv", formFields[media.id]?.imagetextbold_sv);
 
-    // Determine selected media type
     const selectedMediaType = media.video_path ? "video" : "image";
 
     if (selectedMediaType === "image") {
@@ -416,11 +436,10 @@ const AdminPanel = () => {
     console.log(subcategoryId, "IDIDIDIIDIDI");
     deleteSubcategory(subcategoryId)
       .then(() => {
-        // Remove the deleted subcategory from the list
         setSubcategories((prevState) =>
           prevState.filter((subcategory) => subcategory.id !== subcategoryId)
         );
-        // Remove related media for the deleted subcategory
+
         setSelectedMedia((prevState) =>
           prevState.filter((media) => media.subcategory_id !== subcategoryId)
         );
@@ -431,7 +450,6 @@ const AdminPanel = () => {
   };
 
   const handleDelete = (subcategoryId) => {
-    // Show a confirmation dialog before deleting
     const shouldDelete = window.confirm(
       "Are you sure you want to delete this subcategory and its related media?"
     );
@@ -444,7 +462,7 @@ const AdminPanel = () => {
   const handleLahteet = (subcategoryId) => {
     console.log(subcategoryId.id, "eipä ollu");
     setSelectedSubcategory(subcategoryId);
-    setLahteetModal(true); // Open the Lahteet Modal
+    setLahteetModal(true);
   };
 
   return (

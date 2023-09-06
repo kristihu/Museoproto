@@ -2,7 +2,6 @@ import * as React from "react";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { useLanguage } from "./LanguageContext";
 
 const Categories = ({
   categories,
@@ -10,13 +9,11 @@ const Categories = ({
   selectedTitle,
   selectedSubTitle,
 }) => {
-  const { selectedLanguage } = useLanguage();
-
   return (
     <div
       style={{
         marginTop: "112px",
-        marginBottom: "162px",
+
         overflow: "hidden",
       }}
     >
@@ -67,7 +64,7 @@ const Categories = ({
                     alignItems: "center",
                     height: "100%",
                     position: "relative",
-                    boxShadow: "0px 0px 10px 5px rgba(0, 0, 0, 0.5)",
+                    boxShadow: "0px 0px 0px 0px rgba(0, 0, 0, 0.5)",
                   }}
                 >
                   <Typography
@@ -93,7 +90,11 @@ const Categories = ({
                   <img
                     src={`http://localhost:3001${category.image_path}`}
                     alt={category.name}
-                    style={{ width: "300px", height: "280px" }}
+                    style={{
+                      width: "300px",
+                      height: "280px",
+                      boxShadow: "0px 0px 15px 5px rgba(0, 0, 0, 0.5)",
+                    }}
                     onClick={() => onCategoryClick(category.id)}
                   />
                 </Box>
@@ -114,7 +115,6 @@ const Categories = ({
                     alignItems: "center",
                     height: "100%",
                     position: "relative",
-                    boxShadow: "0px 0px 10px 5px rgba(0, 0, 0, 0.5)",
                   }}
                 >
                   <Typography
@@ -129,7 +129,7 @@ const Categories = ({
                       color: "white",
 
                       margin: 0,
-                      pointerEvents: "none", // Ignore pointer events
+                      pointerEvents: "none",
                       fontFamily: "Montserrat",
                       fontStyle: "italic",
                       fontWeight: 600,
@@ -140,7 +140,11 @@ const Categories = ({
                   <img
                     src={`http://localhost:3001${category.image_path}`}
                     alt={category.name}
-                    style={{ width: "300px", height: "300px" }}
+                    style={{
+                      width: "300px",
+                      height: "300px",
+                      boxShadow: "0px 0px 15px 5px rgba(0, 0, 0, 0.5)",
+                    }}
                     onClick={() => onCategoryClick(category.id)}
                   />
                 </Box>

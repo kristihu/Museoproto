@@ -29,6 +29,7 @@ const Home = ({ socket }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedTitle, setSelectedTitle] = useState("");
   const [selectedSubTitle, setSelectedSubTitle] = useState("");
+  const [testTitle, setTestTitle] = useState("");
 
   const query = useQuery();
   const isProjector = query.get("projector") === "true";
@@ -49,7 +50,11 @@ const Home = ({ socket }) => {
     });
 
     socket.on("displaySubcategories", (data) => {
-      setSubcategories(data);
+      const { subcategories, categoryInfo } = data;
+      console.log("Subcategories:", subcategories);
+      console.log("Category Info:", categoryInfo);
+      setSubcategories(subcategories);
+      setTestTitle(categoryInfo[0].name);
       setContent([]);
       setCategories([]);
       setVideo(null);
@@ -57,8 +62,13 @@ const Home = ({ socket }) => {
     });
 
     socket.on("displaySubcategoriesOnBack", (data) => {
+      console.log(data, "BACKEKDEKDK");
+      const { subcategories, categoryInfo } = data;
       setTogglePause(false);
-      setSubcategories(data);
+      setSubcategories(subcategories);
+      setVideo(null);
+      setTestTitle(categoryInfo[0].name);
+      setContent([]);
       setCarouselMode(false);
       setClickedImageIndex(null);
     });
@@ -108,11 +118,17 @@ const Home = ({ socket }) => {
       setVideo(videoPath);
       setCarouselMode(false);
     });
-
+    socket.on("languageIconClicked", () => {
+      setTogglePause(false);
+      setCarouselMode(false);
+      setClickedImageIndex(null);
+      setVideo(null);
+    });
     socket.on("resetProjector", () => {
       setTogglePause(false);
       setCarouselMode(false);
       setClickedImageIndex(null);
+      setVideo(null);
     });
 
     socket.on("displayCategoriesOnHome", (data) => {
@@ -179,7 +195,7 @@ const Home = ({ socket }) => {
 
   const handleHomeClick = () => {
     setShowAuthors(false);
-    socket.emit("initialFetch");
+    socket.emit("initialFetch", selectedLanguage);
     socket.emit("homeClicked", selectedLanguage);
   };
 
@@ -201,13 +217,17 @@ const Home = ({ socket }) => {
       setCarouselMode(true);
     }
   };
-
+  const handleResetProjector = () => {
+    setTogglePause(false);
+    setCarouselMode(false);
+    setClickedImageIndex(null);
+  };
   const handleToggleClick = () => {
     socket.emit("toggleCarousel", togglePause);
   };
-  const handleTouchMove = (event) => {
-    event.preventDefault();
-  };
+  //const handleTouchMove = (event) => {
+  //  event.preventDefault();
+  // };
 
   if (isProjector && carouselMode) {
     return (
@@ -256,6 +276,8 @@ const Home = ({ socket }) => {
               handleBackClick={handleBackClick}
               handleHomeClick={handleHomeClick}
               handlePlayToggle={handlePlayToggle}
+              socket={socket}
+              handleResetProjector={handleResetProjector}
             />
           </div>
         )}
@@ -274,6 +296,8 @@ const Home = ({ socket }) => {
               categories={categories}
               subcategories={subcategories}
               onSubcategoryClick={handleSubcategoryClick}
+              selectedLanguage={selectedLanguage}
+              testTitle={testTitle}
             />
           )}
           {content.length > 0 && (

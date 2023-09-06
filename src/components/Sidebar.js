@@ -1,17 +1,31 @@
-import React from "react";
-import { Select, MenuItem } from "@mui/material";
+import React, { useState } from "react";
+import { IconButton } from "@mui/material";
 
-import LanguageIcon from "@mui/icons-material/Language";
-import { useLanguage } from "./LanguageContext"; // Import useLanguage hook
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
+import { useLanguage } from "./LanguageContext";
 import "./Sidebar.css";
 import arrowBackImage from "../images/takaisin.png";
 import homeImage from "../images/koti.png";
+import sv from "../images/sv.png";
+import fi from "../images/fi.png";
+import en from "../images/en.png";
 
-const Sidebar = ({ handleBackClick, handleHomeClick, handlePlayToggle }) => {
-  const { selectedLanguage, changeLanguage } = useLanguage(); // Use the useLanguage hook
+const Sidebar = ({
+  handleBackClick,
+  handleHomeClick,
+  handlePlayToggle,
+  socket,
+  handleResetProjector,
+}) => {
+  const { selectedLanguage, changeLanguage } = useLanguage();
+  const [highlightedLanguage, setHighlightedLanguage] =
+    useState(selectedLanguage);
 
-  const handleLanguageChange = (event) => {
-    changeLanguage(event.target.value); // Call the changeLanguage function when the language is changed
+  const handleLanguageChange = (language) => {
+    socket.emit("languageIconClicked");
+    changeLanguage(language);
+    setHighlightedLanguage(language);
   };
 
   return (
@@ -26,26 +40,40 @@ const Sidebar = ({ handleBackClick, handleHomeClick, handlePlayToggle }) => {
       <div className="custom-icon-button" onClick={handleHomeClick}>
         <img src={homeImage} alt="Home" style={{ width: 60, height: 60 }} />
       </div>
-      <div className="language-select">
-        <LanguageIcon style={{ fontSize: 40 }} />
-        <Select
-          value={selectedLanguage}
-          onChange={handleLanguageChange}
-          variant="outlined"
-          color="primary"
-          className="language-select"
+      <div className="language-icons">
+        <IconButton
+          onClick={() => handleLanguageChange("fi")}
+          className={highlightedLanguage === "fi" ? "highlighted-language" : ""}
         >
-          <MenuItem value="fi">Finnish</MenuItem>
-          <MenuItem value="en">English</MenuItem>
-          <MenuItem value="sv">Swedish</MenuItem>
-          {/* Add more languages as needed */}
-        </Select>
+          <img src={fi} alt="Finnish" style={{ width: 40, height: 40 }} />
+        </IconButton>
+        <IconButton
+          onClick={() => handleLanguageChange("en")}
+          className={highlightedLanguage === "en" ? "highlighted-language" : ""}
+        >
+          <img src={en} alt="English" style={{ width: 40, height: 40 }} />
+        </IconButton>
+        <IconButton
+          onClick={() => handleLanguageChange("sv")}
+          className={highlightedLanguage === "sv" ? "highlighted-language" : ""}
+        >
+          <img src={sv} alt="Swedish" style={{ width: 40, height: 40 }} />
+        </IconButton>
       </div>
       <div className="play-pause-buttons">
-        {/* Play button */}
-        <button onClick={() => handlePlayToggle(true)}>Play</button>
-        {/* Pause button */}
-        <button onClick={() => handlePlayToggle(false)}>Pause</button>
+        <IconButton
+          onClick={() => handlePlayToggle(true)}
+          sx={{ color: "rgb(229, 47, 122)", fontSize: "100px" }}
+        >
+          <PlayArrowIcon sx={{ fontSize: "70px" }} />
+        </IconButton>
+
+        <IconButton
+          onClick={() => handlePlayToggle(false)}
+          sx={{ color: "rgb(229, 47, 122)" }}
+        >
+          <PauseIcon sx={{ fontSize: "70px" }} />
+        </IconButton>
       </div>
     </div>
   );

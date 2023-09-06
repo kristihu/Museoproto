@@ -63,5 +63,12 @@ body,
 }
 
 #root {
-  color: black; /* Replace with your desired font color */
+  color: black;
+}
+.disable-zoom {
+  touch-action: none;
+}
+
+.App.projector .content {
+  width: 100%;
 }

@@ -81,10 +81,10 @@ const upload = multer({
 app.use("/images", express.static(__dirname + "/images"));
 // Create a connection pool to the MySQL database
 const pool = mysql.createPool({
-  host: "",
-  user: "",
-  password: "",
-  database: "",
+  host: "localhost",
+  user: "root",
+  password: "Vitunhuora12",
+  database: "teatteri",
   connectionLimit: 10,
 });
 
@@ -106,15 +106,14 @@ const io = new Server(server, { cors: { origin: "*" } });
 app.get("/categories", async (req, res) => {
   try {
     const connection = await pool.getConnection();
-    const selectedLanguage = req.query.language; // Get the selected language from the query parameter
+    const selectedLanguage = req.query.language;
 
-    // Determine which translation column to use based on the selected language
     const translationColumn =
       selectedLanguage === "en"
         ? "name_en"
         : selectedLanguage === "sv"
         ? "name_sv"
-        : "name"; // Default to the original name column (Finnish)
+        : "name";
 
     const [rows] = await connection.query(
       `SELECT id, image_path, ${translationColumn} AS name FROM category`
@@ -130,14 +129,13 @@ app.get("/categories", async (req, res) => {
 
 app.post("/upload", upload.single("image"), (req, res) => {
   try {
-    let imagePath = req.file.path.replace(/\\/g, "/"); // Replace backslashes with forward slashes
+    let imagePath = req.file.path.replace(/\\/g, "/");
 
     // If running on Windows, remove the drive letter from the path
     if (process.platform === "win32") {
       imagePath = imagePath.replace(/^[A-Z]:/i, "");
     }
 
-    // Return the updated image path in the response
     res.send({ imagePath });
   } catch (error) {
     console.error("Error uploading image: ", error);
@@ -186,7 +184,6 @@ app.post("/subcategories", async (req, res) => {
     );
     connection.release();
 
-    // Send the new subcategory's ID in the response
     res.send({ id: result.insertId });
   } catch (error) {
     console.error("Error creating subcategory: ", error);
@@ -213,13 +210,11 @@ app.post("/media/:subcategoryId", upload.single("file"), async (req, res) => {
     }
 
     if (req.file.mimetype.startsWith("video")) {
-      // Uploaded file is a video
       videoPath = req.file.path.replace(/\\/g, "/");
       if (!videoPath.startsWith("/")) {
         videoPath = `/${videoPath}`;
       }
     } else {
-      // Uploaded file is an image
       imagePath = req.file.path.replace(/\\/g, "/");
       if (!imagePath.startsWith("/")) {
         imagePath = `/${imagePath}`;
@@ -243,7 +238,6 @@ app.post("/media/:subcategoryId", upload.single("file"), async (req, res) => {
     );
     connection.release();
 
-    // Send the new media's ID in the response
     res.send({ id: result.insertId });
   } catch (error) {
     console.error("Error creating media: ", error);
@@ -266,7 +260,6 @@ app.put("/subcategories/:id", async (req, res) => {
       throw new Error("Image path is missing in the request body");
     }
 
-    // Add a leading slash to the image path if it doesn't have one
     const formattedImagePath = imagePath.startsWith("/")
       ? imagePath
       : `/${imagePath}`;
@@ -312,16 +305,13 @@ app.put("/media/:id", upload.single("file"), async (req, res) => {
     let imagePath = null;
     let videoPath = null;
 
-    // Check if a new file is uploaded
     if (req.file) {
       if (req.file.mimetype.startsWith("video")) {
-        // Uploaded file is a video
         videoPath = req.file.path.replace(/\\/g, "/");
         if (!videoPath.startsWith("/")) {
           videoPath = `/${videoPath}`;
         }
       } else {
-        // Uploaded file is an image
         imagePath = req.file.path.replace(/\\/g, "/");
         if (!imagePath.startsWith("/")) {
           imagePath = `/${imagePath}`;
@@ -357,7 +347,6 @@ app.delete("/media/:id/:mediaId", async (req, res) => {
     const subcategoryId = req.params.id;
     const mediaId = req.params.mediaId;
 
-    // Delete the specific media entry with the given mediaId from the database
     const query = "DELETE FROM media WHERE subcategory_id = ? AND id = ?";
     const values = [subcategoryId, mediaId];
     await pool.query(query, values);
@@ -373,7 +362,6 @@ app.get("/media/:id/:mediaId", async (req, res) => {
     const subcategoryId = req.params.id;
     const mediaId = req.params.mediaId;
 
-    // Fetch the specific media entry with the given mediaId from the database
     const query = "SELECT * FROM media WHERE subcategory_id = ? AND id = ?";
     const values = [subcategoryId, mediaId];
     const result = await pool.query(query, values);
@@ -449,7 +437,7 @@ app.get("/media", async (req, res) => {
 app.get("/media/:subcategoryId", async (req, res) => {
   try {
     const subcategoryId = req.params.subcategoryId;
-    const selectedLanguage = req.query.language; // Get the selected language from the query parameter
+    const selectedLanguage = req.query.language;
 
     const connection = await pool.getConnection();
 
@@ -458,14 +446,14 @@ app.get("/media/:subcategoryId", async (req, res) => {
         ? "imagetext_en"
         : selectedLanguage === "sv"
         ? "imagetext_sv"
-        : "imagetext"; // Default to the original imagetext column (Finnish)
+        : "imagetext";
 
     const boldTextTranslationColumn =
       selectedLanguage === "en"
         ? "imagetextbold_en"
         : selectedLanguage === "sv"
         ? "imagetextbold_sv"
-        : "imagetextbold"; // Default to the original imagetextbold column (Finnish)
+        : "imagetextbold";
 
     const [rows] = await connection.query(
       `SELECT id, image_path, video_path, ${textTranslationColumn} AS imagetext, ${boldTextTranslationColumn} AS imagetextbold FROM media WHERE subcategory_id = ?`,
@@ -486,13 +474,11 @@ app.delete("/subcategories/:id", async (req, res) => {
 
     const connection = await pool.getConnection();
 
-    // First, fetch the image_path and video_path of media related to the subcategory
     const [mediaRows] = await connection.query(
       "SELECT image_path, video_path FROM media WHERE subcategory_id = ?",
       [subcategoryId]
     );
 
-    // Delete the subcategory
     const [result] = await connection.query(
       "DELETE FROM subcategory WHERE id = ?",
       [subcategoryId]
@@ -504,14 +490,11 @@ app.delete("/subcategories/:id", async (req, res) => {
       throw new Error("Subcategory not found");
     }
 
-    // Now, delete the media files from the server
     for (const media of mediaRows) {
       if (media.image_path) {
-        // Delete the image file from the server (you need to implement this function)
         deleteFileFromServer(media.image_path);
       }
       if (media.video_path) {
-        // Delete the video file from the server (you need to implement this function)
         deleteFileFromServer(media.video_path);
       }
     }
@@ -677,7 +660,6 @@ app.post("/contenttext/:subcategoryId", async (req, res) => {
     );
     connection.release();
 
-    // Send the new content text's ID in the response
     res.send({ id: result.insertId });
   } catch (error) {
     console.error("Error creating content text: ", error);
@@ -721,9 +703,8 @@ app.put("/contenttext/:id", async (req, res) => {
 app.get("/subcategories/:categoryId", async (req, res) => {
   try {
     const categoryId = req.params.categoryId;
-    const selectedLanguage = req.query.language; // Get the selected language from the query parameter
+    const selectedLanguage = req.query.language;
 
-    // Define all translation columns
     const translationColumns = [
       "name",
       "name_en",
@@ -733,7 +714,6 @@ app.get("/subcategories/:categoryId", async (req, res) => {
       "alateksti_sv",
     ];
 
-    // Check if the selected language is valid, otherwise default to "name"
     const selectedTranslationColumn = translationColumns.includes(
       `name_${selectedLanguage}`
     )
@@ -761,9 +741,8 @@ app.get("/subcategories/:categoryId", async (req, res) => {
 app.get("/subcategory/:subcategoryId", async (req, res) => {
   try {
     const subcategoryId = req.params.subcategoryId;
-    const selectedLanguage = req.query.language; // Get the selected language from the query parameter
+    const selectedLanguage = req.query.language;
 
-    // Define all translation columns
     const translationColumns = [
       "name",
       "name_en",
@@ -773,7 +752,6 @@ app.get("/subcategory/:subcategoryId", async (req, res) => {
       "alateksti_sv",
     ];
 
-    // Check if the selected language is valid, otherwise default to "name"
     const selectedTranslationColumn = translationColumns.includes(
       `name_${selectedLanguage}`
     )
@@ -811,7 +789,7 @@ io.on("connection", async (socket) => {
     try {
       const connection = await pool.getConnection();
       const translationColumn =
-        language === "en" ? "name_en" : language === "sv" ? "name_sv" : "name"; // Default to the original name column (Finnish)
+        language === "en" ? "name_en" : language === "sv" ? "name_sv" : "name";
       const [rows] = await connection.query(
         `SELECT id, image_path, ${translationColumn} AS name FROM category`
       );
@@ -837,14 +815,14 @@ io.on("connection", async (socket) => {
           ? "alateksti_en"
           : selectedLanguage === "sv"
           ? "alateksti_sv"
-          : "alateksti"; // Default to the original alateksti column (Finnish)
+          : "alateksti";
 
       const translationColumn =
         selectedLanguage === "en"
           ? "name_en"
           : selectedLanguage === "sv"
           ? "name_sv"
-          : "name"; // Default to the original name column (Finnish)
+          : "name";
 
       const query = `
       SELECT id, image_path, ?? AS name, ?? AS alateksti
@@ -858,8 +836,18 @@ io.on("connection", async (socket) => {
         categoryId,
       ];
       const [rows] = await connection.query(query, queryParams);
+      const categoryQuery = `
+      SELECT
+        name,
+        ${translationColumn} AS name
+      FROM category
+      WHERE id = ?
+    `;
+      const [categoryInfo] = await connection.query(categoryQuery, [
+        categoryId,
+      ]);
+      io.emit("displaySubcategories", { subcategories: rows, categoryInfo });
       connection.release();
-      io.emit("displaySubcategories", rows);
     } catch (error) {
       console.error(
         `Error fetching subcategories for category ${categoryId}: `,
@@ -879,35 +867,35 @@ io.on("connection", async (socket) => {
             ? "imagetext_en"
             : selectedLanguage === "sv"
             ? "imagetext_sv"
-            : "imagetext"; // Default to the original imagetext column (Finnish)
+            : "imagetext";
 
         const boldTextTranslationColumn =
           selectedLanguage === "en"
             ? "imagetextbold_en"
             : selectedLanguage === "sv"
             ? "imagetextbold_sv"
-            : "imagetextbold"; // Default to the original imagetextbold column (Finnish)
+            : "imagetextbold";
 
         const subcategoryNameColumn =
           selectedLanguage === "en"
             ? "name_en"
             : selectedLanguage === "sv"
             ? "name_sv"
-            : "name"; // Default to the original imagetextbold column (Finnish)
+            : "name";
 
         const alatekstiColumn =
           selectedLanguage === "en"
             ? "alateksti_en"
             : selectedLanguage === "sv"
             ? "alateksti_sv"
-            : "alateksti"; // Default to the original alateksti column (Finnish)
+            : "alateksti";
 
         const contentTextColumn =
           selectedLanguage === "en"
             ? "text_en"
             : selectedLanguage === "sv"
             ? "text_sv"
-            : "text"; // Default
+            : "text";
 
         const esiintyjatColumn =
           selectedLanguage === "en"
@@ -957,7 +945,6 @@ io.on("connection", async (socket) => {
   );
 
   socket.on("carouselToggled", (play) => {
-    // Broadcast the play/pause status to all connected clients
     io.emit("carouselToggled", play);
   });
 
@@ -966,7 +953,7 @@ io.on("connection", async (socket) => {
       const connection = await pool.getConnection();
       const [rows] = await connection.query(
         "SELECT image_path, imagetext, imagetextbold, video_path FROM media WHERE subcategory_id = ?",
-        [subcategoryId] // Include the subcategory_id parameter in the query
+        [subcategoryId]
       );
       connection.release();
 
@@ -985,7 +972,7 @@ io.on("connection", async (socket) => {
           io.emit("displayImageAtIndex", {
             index,
             images,
-            subcategory_id: subcategoryId, // Include the subcategory_id in the emitted event
+            subcategory_id: subcategoryId,
           });
         }
       }
@@ -1020,8 +1007,21 @@ io.on("connection", async (socket) => {
       const query = `SELECT id, image_path, ?? AS name, ?? as alateksti FROM subcategory WHERE category_id = ?`;
       const queryParams = [translationColumn, alatekstiColumn, categoryId];
       const [rows] = await connection.query(query, queryParams);
+      const categoryQuery = `
+      SELECT
+        name,
+        ${translationColumn} AS name
+      FROM category
+      WHERE id = ?
+    `;
+      const [categoryInfo] = await connection.query(categoryQuery, [
+        categoryId,
+      ]);
       connection.release();
-      io.emit("displaySubcategoriesOnBack", rows);
+      io.emit("displaySubcategoriesOnBack", {
+        subcategories: rows,
+        categoryInfo,
+      });
     } catch (error) {
       console.error(
         `Error fetching subcategories for category ${categoryId}: `,
@@ -1033,6 +1033,10 @@ io.on("connection", async (socket) => {
   socket.on("toggleCarousel", () => {
     io.emit("carouselToggled");
   });
+
+  socket.on("languageIconClicked", () => {
+    io.emit("resetProjector");
+  });
   socket.on("homeClicked", async (selectedLanguage) => {
     try {
       const connection = await pool.getConnection();
@@ -1041,7 +1045,7 @@ io.on("connection", async (socket) => {
           ? "name_en"
           : selectedLanguage === "sv"
           ? "name_sv"
-          : "name"; // Default to the original name column (Finnish)
+          : "name";
       const query = `SELECT id, image_path, ?? AS name FROM category`;
       const queryParams = [translationColumn];
       const [rows] = await connection.query(query, queryParams);

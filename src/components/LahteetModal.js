@@ -67,7 +67,6 @@ const LahteetModal = ({ open, onClose, selectedSubcategory }) => {
         })
         .catch((error) => {
           console.error("Error updating lahteet", error);
-          // Handle the error as needed
         });
     } else {
       console.log(formDataWithId, "asd");
@@ -84,7 +83,6 @@ const LahteetModal = ({ open, onClose, selectedSubcategory }) => {
         })
         .catch((error) => {
           console.error("Error creating lahteet", error);
-          // Handle the error as needed
         });
     }
   };

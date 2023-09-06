@@ -7,10 +7,12 @@ const Subcategories = ({
   lastCategoryId,
   categories,
   selectedCategory,
+  selectedLanguage,
+  testTitle,
 }) => {
-  console.log("Categories:", subcategories);
+  console.log("Categories:", selectedLanguage);
   console.log("Last Category ID:", lastCategoryId);
-  const category = categories.find((cat) => cat.id === lastCategoryId);
+  //const category = categories.find((cat) => cat.id === lastCategoryId);
   console.log("title", lastCategoryId);
   return (
     <div>
@@ -26,7 +28,7 @@ const Subcategories = ({
           color: "rgb(184, 38, 80)",
         }}
       >
-        {selectedCategory}
+        {testTitle}
       </Typography>
       <Grid
         container
@@ -55,7 +57,7 @@ const Subcategories = ({
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "flex-start", // Align text to the left
+                alignItems: "flex-start",
                 justifyContent: "center",
                 textAlign: "left",
                 marginTop: "-0px",
@@ -80,7 +82,7 @@ const Subcategories = ({
                   fontFamily: "Montserrat",
                   fontStyle: "italic",
                   fontWeight: 800, // boldimmaksi
-                  marginLeft: "0px", // Add left margin for better alignment
+                  marginLeft: "0px",
                 }}
               >
                 {subcategory.name}
@@ -92,7 +94,7 @@ const Subcategories = ({
                   fontSize: "12px",
                   fontWeight: 500, // boldimmaksi
                   marginLeft: "0px",
-                  lineHeight: "0.95", // Add left margin for better alignment
+                  lineHeight: "0.95",
                 }}
               >
                 {subcategory.alateksti}

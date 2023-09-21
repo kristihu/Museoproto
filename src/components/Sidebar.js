@@ -17,12 +17,20 @@ const Sidebar = ({
   handlePlayToggle,
   socket,
   handleResetProjector,
+  content,
+  togglePause,
+  playpause,
 }) => {
   const { selectedLanguage, changeLanguage } = useLanguage();
   const [highlightedLanguage, setHighlightedLanguage] =
     useState(selectedLanguage);
+  const [activeButton, setActiveButton] = useState("play");
 
   const handleLanguageChange = (language) => {
+    if (language === highlightedLanguage) {
+      return;
+    }
+
     socket.emit("languageIconClicked");
     changeLanguage(language);
     setHighlightedLanguage(language);
@@ -30,50 +38,75 @@ const Sidebar = ({
 
   return (
     <div className="sidebar">
-      <div className="custom-icon-button" onClick={handleBackClick}>
-        <img
-          src={arrowBackImage}
-          alt="Back"
-          style={{ width: 60, height: 60 }}
-        />
-      </div>
-      <div className="custom-icon-button" onClick={handleHomeClick}>
-        <img src={homeImage} alt="Home" style={{ width: 60, height: 60 }} />
-      </div>
       <div className="language-icons">
         <IconButton
           onClick={() => handleLanguageChange("fi")}
           className={highlightedLanguage === "fi" ? "highlighted-language" : ""}
         >
-          <img src={fi} alt="Finnish" style={{ width: 40, height: 40 }} />
+          <img src={fi} alt="Finnish" style={{ width: "75%", height: "75%" }} />
         </IconButton>
         <IconButton
           onClick={() => handleLanguageChange("en")}
           className={highlightedLanguage === "en" ? "highlighted-language" : ""}
         >
-          <img src={en} alt="English" style={{ width: 40, height: 40 }} />
+          <img src={en} alt="English" style={{ width: "75%", height: "75%" }} />
         </IconButton>
         <IconButton
           onClick={() => handleLanguageChange("sv")}
           className={highlightedLanguage === "sv" ? "highlighted-language" : ""}
         >
-          <img src={sv} alt="Swedish" style={{ width: 40, height: 40 }} />
+          <img src={sv} alt="Swedish" style={{ width: "75%", height: "75%" }} />
         </IconButton>
       </div>
-      <div className="play-pause-buttons">
-        <IconButton
-          onClick={() => handlePlayToggle(true)}
-          sx={{ color: "rgb(229, 47, 122)", fontSize: "100px" }}
-        >
-          <PlayArrowIcon sx={{ fontSize: "70px" }} />
-        </IconButton>
 
-        <IconButton
-          onClick={() => handlePlayToggle(false)}
-          sx={{ color: "rgb(229, 47, 122)" }}
-        >
-          <PauseIcon sx={{ fontSize: "70px" }} />
-        </IconButton>
+      <div className="custom-icons-container">
+        <div className="custom-icon-button" onClick={handleHomeClick}>
+          <img src={homeImage} alt="Home" style={{ width: 100, height: 100 }} />
+        </div>
+        <div className="custom-icon-button" onClick={handleBackClick}>
+          <img
+            src={arrowBackImage}
+            alt="Back"
+            style={{ width: 100, height: 100 }}
+          />
+        </div>
+      </div>
+      <div className="play-pause-container">
+        {content.length > 0 && (
+          <div className="play-pause-buttons">
+            <h4 className="karuselli">Kuvakaruselli</h4>
+            {playpause ? (
+              <IconButton
+                onClick={() => {
+                  togglePause();
+                }}
+                sx={{
+                  color: "rgb(229, 47, 122)",
+                  fontSize: "100px",
+                  marginLeft: "20px",
+                  marginTop: "-20px",
+                }}
+                className={activeButton === "play" ? "highlighted" : ""}
+              >
+                <PlayArrowIcon sx={{ fontSize: "130px" }} />
+              </IconButton>
+            ) : (
+              <IconButton
+                onClick={() => {
+                  togglePause();
+                }}
+                sx={{
+                  color: "rgb(229, 47, 122)",
+                  marginLeft: "30px",
+                  marginTop: "-20px",
+                }}
+                className={activeButton === "pause" ? "highlighted" : ""}
+              >
+                <PauseIcon sx={{ fontSize: "130px" }} />
+              </IconButton>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

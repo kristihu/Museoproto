@@ -79,6 +79,7 @@ const AdminPanel = () => {
     imagetext_sv: "",
     imagetextbold_en: "",
     imagetextbold_sv: "",
+
     selectedMediaFile: null,
     mediaType: "image",
   });
@@ -168,6 +169,8 @@ const AdminPanel = () => {
             imagetext_sv: mediaItem.imagetext_sv || "",
             imagetextbold_en: mediaItem.imagetextbold_en || "",
             imagetextbold_sv: mediaItem.imagetextbold_sv || "",
+            image_path: mediaItem.image_path || "",
+            video_path: mediaItem.video_path || "",
           };
         });
 
@@ -217,6 +220,7 @@ const AdminPanel = () => {
             text_en: "",
             text_sv: "",
           });
+          window.alert("Leipätekstit tallennettu onnistuneesti!");
         })
         .catch((error) => {
           console.error("Error updating content text: ", error);
@@ -286,7 +290,6 @@ const AdminPanel = () => {
           console.error("Error updating subcategory: ", error);
         });
     } else {
-      // No new image is picked, use the image_path from the input field
       updateSubcategoryWithImagePath(editSubcategory)
         .then((response) => {
           setSubcategories((prevState) =>
@@ -411,13 +414,15 @@ const AdminPanel = () => {
     if (selectedMediaType === "image") {
       if (selectedMediaImage) {
         formData.append("file", selectedMediaImage);
+      } else {
+        formData.append("image_path", formFields[media.id]?.image_path);
       }
-      formData.append("image_path", media.image_path);
     } else if (selectedMediaType === "video") {
       if (selectedMediaImage) {
         formData.append("file", selectedMediaImage);
+      } else {
+        formData.append("video_path", formFields[media.id]?.video_path);
       }
-      formData.append("video_path", media.video_path);
     }
 
     updateMedia(mediaId, formData)
@@ -426,6 +431,7 @@ const AdminPanel = () => {
         media.image_path = updatedMediaData.image_path;
         media.video_path = updatedMediaData.video_path;
         setSelectedMedia(updatedMedia);
+        window.alert("Media tallennettu onnistuneesti!");
       })
       .catch((error) => {
         console.error("Error updating media: ", error);
@@ -554,7 +560,7 @@ const AdminPanel = () => {
             <TableRow>
               <TableCell>ID</TableCell>
               <TableCell>Nimi</TableCell>
-              <TableCell>Kuvapolku</TableCell>
+              <TableCell>Kuva</TableCell>
 
               <TableCell>Toiminnot</TableCell>
             </TableRow>
@@ -569,7 +575,12 @@ const AdminPanel = () => {
                   {row.id}
                 </TableCell>
                 <TableCell>{row.name}</TableCell>
-                <TableCell>{row.image_path}</TableCell>
+                <TableCell>
+                  <img
+                    style={{ width: "60px", height: "60px" }}
+                    src={`http://localhost:3001${row.image_path}`}
+                  ></img>
+                </TableCell>
 
                 <TableCell>
                   <Button onClick={() => handleEdit(row.id)}>Muokkaa</Button>
@@ -692,41 +703,42 @@ const AdminPanel = () => {
           {selectedMedia.map((media, index) => (
             <div key={media.id}>
               <TextField
-                label="Image Text"
+                label="Kuvateksti"
                 name="imagetext"
                 value={formFields[media.id]?.imagetext || ""}
                 onChange={(event) => handleImageTextChange(event, media.id)}
               />
               <TextField
-                label="Image Text Bold"
+                label="Kuvalähde"
                 name="imagetextbold"
                 value={formFields[media.id]?.imagetextbold || ""}
                 onChange={(event) => handleImageTextChange(event, media.id)}
               />
               <TextField
-                label="Image Text (English)"
+                label="Kuva teksti (English)"
                 name="imagetext_en"
                 value={formFields[media.id]?.imagetext_en || ""}
                 onChange={(event) => handleImageTextChange(event, media.id)}
               />
               <TextField
-                label="Image Text (Swedish)"
+                label="Kuva teksti(Swedish)"
                 name="imagetext_sv"
                 value={formFields[media.id]?.imagetext_sv || ""}
                 onChange={(event) => handleImageTextChange(event, media.id)}
               />
               <TextField
-                label="Image Text Bold (English)"
+                label="Kuvalähde(English)"
                 name="imagetextbold_en"
                 value={formFields[media.id]?.imagetextbold_en || ""}
                 onChange={(event) => handleImageTextChange(event, media.id)}
               />
               <TextField
-                label="Image Text Bold (Swedish)"
+                label="Kuvalähde (Swedish)"
                 name="imagetextbold_sv"
                 value={formFields[media.id]?.imagetextbold_sv || ""}
                 onChange={(event) => handleImageTextChange(event, media.id)}
               />
+
               <input
                 type="file"
                 onChange={(event) => handleMediaImageChange(event, media.id)}
@@ -859,6 +871,7 @@ const AdminPanel = () => {
             <MenuItem value="video">Video</MenuItem>
           </Select>
           <input type="file" onChange={handleAddMediaChange} />
+
           <Button onClick={handleCreateMedia}>Create</Button>
         </Box>
       </Modal>

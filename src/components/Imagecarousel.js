@@ -59,7 +59,14 @@ function ImageCarousel({ images, clickedImageIndex, togglePause }) {
   }, [clickedImageIndex, images]);
 
   return (
-    <div style={{ position: "relative", height: "100vh", overflow: "hidden" }}>
+    <div
+      style={{
+        position: "relative",
+        height: "100vh",
+        overflow: "hidden",
+        background: "black",
+      }}
+    >
       <AnimatePresence initial={false}>
         {previous !== null && (
           <motion.div

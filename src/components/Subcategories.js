@@ -12,30 +12,39 @@ const Subcategories = ({
 }) => {
   console.log("Categories:", selectedLanguage);
   console.log("Last Category ID:", lastCategoryId);
-  //const category = categories.find((cat) => cat.id === lastCategoryId);
   console.log("title", lastCategoryId);
   return (
     <div>
-      <Typography
-        variant="h3"
-        align="center"
-        sx={{
-          fontSize: "90px",
-          fontFamily: "Montserrat",
-          fontStyle: "italic",
-          fontWeight: 600,
-          marginTop: "110px",
-          color: "rgb(184, 38, 80)",
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "112px",
+          marginTop: "60px",
         }}
       >
-        {testTitle}
-      </Typography>
+        <Typography
+          variant="h2"
+          align="center"
+          sx={{
+            fontSize: "110px",
+            fontFamily: "Montserrat",
+            fontStyle: "italic",
+            fontWeight: 600,
+            color: "rgb(184, 38, 80)",
+            marginTop: "150px",
+          }}
+        >
+          {testTitle}
+        </Typography>
+      </div>
       <Grid
         container
         sx={{
           flexWrap: "wrap",
-          marginTop: "70px",
-          marginLeft: "16.5%",
+          marginLeft: "300px",
+          marginTop: "150px", // Center the grid horizontally
         }}
         justifyContent="center"
         alignItems="center"
@@ -47,10 +56,11 @@ const Subcategories = ({
             xs={3}
             key={subcategory.id}
             sx={{
-              width: "240px",
-              height: "164px",
-              marginBottom: "60px",
-              marginLeft: "-40px",
+              width: "280px",
+              height: "auto",
+              marginTop: "50px",
+              marginBottom: "20px",
+              marginLeft: "-85px",
             }}
           >
             <Box
@@ -60,16 +70,16 @@ const Subcategories = ({
                 alignItems: "flex-start",
                 justifyContent: "center",
                 textAlign: "left",
-                marginTop: "-0px",
-                marginBottom: "144px",
+                marginTop: "-30px",
+                marginBottom: "0px",
               }}
             >
               <img
                 src={`http://localhost:3001${subcategory.image_path}`}
                 alt={subcategory.name}
                 style={{
-                  width: "240px",
-                  height: "164px",
+                  width: "300px",
+                  height: "210px",
                   objectFit: "cover",
                   boxShadow: "0px 0px 10px 5px rgba(0, 0, 0, 0.5)",
                 }}
@@ -80,9 +90,14 @@ const Subcategories = ({
                 variant="subtitle1"
                 sx={{
                   fontFamily: "Montserrat",
+                  marginTop: "10px",
+                  marginBottom: "5px",
                   fontStyle: "italic",
                   fontWeight: 800, // boldimmaksi
                   marginLeft: "0px",
+                  wordWrap: "break-word",
+                  lineHeight: "1.1",
+                  maxWidth: "280px",
                 }}
               >
                 {subcategory.name}
@@ -95,6 +110,8 @@ const Subcategories = ({
                   fontWeight: 500, // boldimmaksi
                   marginLeft: "0px",
                   lineHeight: "0.95",
+                  wordWrap: "break-word",
+                  maxWidth: "280px",
                 }}
               >
                 {subcategory.alateksti}

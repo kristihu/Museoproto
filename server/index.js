@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const filename = file.originalname;
-    const imagePath = "/" + filename; // Use the original filename
+    const imagePath = "/" + filename;
     cb(null, filename);
   },
 });
@@ -34,7 +34,13 @@ const titles = {
     en: "before and now",
     sv: "före och nu",
   },
+  lahteetTitles: {
+    fi: ["Lähteet", "Esityksen tekijät"],
+    en: ["Sources", "Makers?"],
+    sv: ["svesrc", "svens?"],
+  },
 };
+
 const fileFilter = (req, file, cb) => {
   // Accept image files with extensions .jpg, .jpeg, .png and video files with extensions .mp4, .mkv, .avi, .mov, .wmv
   if (
@@ -302,10 +308,16 @@ app.put("/media/:id", upload.single("file"), async (req, res) => {
       imagetextbold_en,
       imagetextbold_sv,
     } = req.body;
-    let imagePath = null;
-    let videoPath = null;
+
+    let imagePath = req.body.image_path || null;
+    let videoPath = req.body.video_path || null;
+
+    if (imagePath && !imagePath.startsWith("/")) {
+      imagePath = `/${imagePath}`;
+    }
 
     if (req.file) {
+      // File was uploaded, handle it
       if (req.file.mimetype.startsWith("video")) {
         videoPath = req.file.path.replace(/\\/g, "/");
         if (!videoPath.startsWith("/")) {
@@ -437,30 +449,27 @@ app.get("/media", async (req, res) => {
 app.get("/media/:subcategoryId", async (req, res) => {
   try {
     const subcategoryId = req.params.subcategoryId;
-    const selectedLanguage = req.query.language;
 
     const connection = await pool.getConnection();
 
-    const textTranslationColumn =
-      selectedLanguage === "en"
-        ? "imagetext_en"
-        : selectedLanguage === "sv"
-        ? "imagetext_sv"
-        : "imagetext";
-
-    const boldTextTranslationColumn =
-      selectedLanguage === "en"
-        ? "imagetextbold_en"
-        : selectedLanguage === "sv"
-        ? "imagetextbold_sv"
-        : "imagetextbold";
-
+    // Fetch all language translations for media
     const [rows] = await connection.query(
-      `SELECT id, image_path, video_path, ${textTranslationColumn} AS imagetext, ${boldTextTranslationColumn} AS imagetextbold FROM media WHERE subcategory_id = ?`,
+      `SELECT
+        id,
+        image_path,
+        video_path,
+        imagetext,
+        imagetext_en,
+        imagetext_sv,
+        imagetextbold ,
+        imagetextbold_en,
+        imagetextbold_sv
+      FROM media WHERE subcategory_id = ?`,
       [subcategoryId]
     );
 
     connection.release();
+
     res.send(rows);
   } catch (error) {
     console.error("Error fetching media: ", error);
@@ -799,8 +808,10 @@ io.on("connection", async (socket) => {
         language === "en" || language === "sv" ? language : "fi";
       const selectedTitle = titles.esityksiä[defaultLanguage];
       const selectedSubtitle = titles.ennenJaNyt[defaultLanguage];
+      const lahdeTitles = titles.lahteetTitles[defaultLanguage];
       io.emit("displayTitle", selectedTitle);
       io.emit("displaySubtitle", selectedSubtitle);
+      io.emit("displayLahteetTitles", lahdeTitles);
     } catch (error) {
       console.error("Error fetching categories: ", error);
     }
@@ -904,7 +915,8 @@ io.on("connection", async (socket) => {
             ? "esiintyjat_sv"
             : "esiintyjat";
 
-        const mediaQuery = `SELECT id, image_path, video_path, ${textTranslationColumn} AS imagetext, ${boldTextTranslationColumn} AS imagetextbold, subcategory_id FROM media WHERE subcategory_id = ?`; // Include subcategory_id in the query
+        const mediaQuery = `SELECT id, image_path, video_path, ${textTranslationColumn} AS imagetext, ${boldTextTranslationColumn} AS imagetextbold, quality, subcategory_id FROM media WHERE subcategory_id = ?`;
+
         const contenttextQuery = `SELECT ${contentTextColumn} AS text FROM contenttext WHERE subcategory_id = ?`;
         const esiintyjatQuery =
           "SELECT id, esiintyja, hahmo, rooli, subcategory_id FROM esiintyjat WHERE subcategory_id = ?";
@@ -952,7 +964,7 @@ io.on("connection", async (socket) => {
     try {
       const connection = await pool.getConnection();
       const [rows] = await connection.query(
-        "SELECT image_path, imagetext, imagetextbold, video_path FROM media WHERE subcategory_id = ?",
+        "SELECT image_path, imagetext, imagetextbold, video_path, quality FROM media WHERE subcategory_id = ?",
         [subcategoryId]
       );
       connection.release();
@@ -962,7 +974,10 @@ io.on("connection", async (socket) => {
       if (selectedItem) {
         if (selectedItem.video_path) {
           console.log("Play video:", selectedItem.video_path);
-          io.emit("playVideo", selectedItem.video_path);
+          io.emit("playVideo", {
+            video_path: selectedItem.video_path,
+            quality: selectedItem.quality,
+          });
         } else if (selectedItem.image_path) {
           const images = rows.map((row) => ({
             image_path: row.image_path,
@@ -1036,6 +1051,7 @@ io.on("connection", async (socket) => {
 
   socket.on("languageIconClicked", () => {
     io.emit("resetProjector");
+    io.emit("displayCategoriesOnHome", []);
   });
   socket.on("homeClicked", async (selectedLanguage) => {
     try {

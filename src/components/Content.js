@@ -20,6 +20,7 @@ const Content = ({
   onImageClick,
 
   contenttext,
+  lahdeTitles,
 
   showAuthors,
   setShowAuthors,
@@ -29,8 +30,6 @@ const Content = ({
 }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isVertical, setIsVertical] = useState(false);
-
-  console.log(authors, "toimiix");
 
   useEffect(() => {
     const heroImage = new Image();
@@ -71,6 +70,45 @@ const Content = ({
           "& .italic": {
             fontStyle: "italic",
             fontWeight: 800,
+          },
+        }}
+      >
+        {paragraph.split("\n").map((line, lineIndex) => {
+          const formattedLine = line.replace(
+            italicRegex,
+            (_, capturedText) => `<span class="italic">${capturedText}</span>`
+          );
+          return (
+            <React.Fragment key={lineIndex}>
+              <div
+                dangerouslySetInnerHTML={{ __html: formattedLine }}
+                style={{ marginBottom: "11px" }}
+              />
+            </React.Fragment>
+          );
+        })}
+      </Typography>
+    ));
+  };
+  const formatTextt = (text) => {
+    const paragraphs = text.split(/\n{2,}/);
+    const italicRegex = /\[(.*?)\]/g;
+
+    return paragraphs.map((paragraph, index) => (
+      <Typography
+        key={index}
+        variant="body1"
+        component="span"
+        gutterBottom
+        sx={{
+          marginTop: "22px",
+          fontSize: "15px",
+          lineHeight: "21px",
+          fontFamily: "Montserrat",
+          fontWeight: 500,
+          "& .italic": {
+            fontStyle: "italic",
+            fontWeight: 500,
           },
         }}
       >
@@ -154,14 +192,15 @@ const Content = ({
 
     return formattedLines;
   };
-  const titleThreshold = 20; // Adjust this value as needed
+  const titleThreshold = 20;
 
-  // Determine if the title should be split into two lines
   const isLongTitle = subTitle.length > titleThreshold;
 
   if (showAuthors) {
     return (
-      <div style={{ marginLeft: "50px" }}>
+      <div
+        style={{ marginLeft: "150px", marginRight: "60px", marginTop: "100px" }}
+      >
         <Grid container>
           <Grid item xs={6} direction="row">
             <Typography
@@ -176,7 +215,7 @@ const Content = ({
                 marginTop: "50px",
               }}
             >
-              Esityksen tekijät
+              {lahdeTitles[1]}
             </Typography>
           </Grid>
           <Grid item xs={6}>
@@ -192,7 +231,7 @@ const Content = ({
                 marginLeft: "380px",
               }}
             >
-              Lähteet
+              {lahdeTitles[0]}
             </Typography>
           </Grid>
         </Grid>
@@ -258,7 +297,7 @@ const Content = ({
                 fontWeight: 500,
               }}
             >
-              {authors && formatText(authors[0].lahteet)}
+              {authors && formatTextt(authors[0].lahteet)}
             </Typography>
           </Grid>
         </Grid>
@@ -275,7 +314,7 @@ const Content = ({
 
   if (isVertical) {
     return (
-      <Grid container style={{ marginLeft: "100px" }}>
+      <Grid container style={{ marginLeft: "30px", marginTop: "-25px" }}>
         <Grid item sm={5}>
           <Box style={{ marginLeft: "158px", marginTop: "10px" }}>
             <Typography
@@ -314,11 +353,12 @@ const Content = ({
             <Box
               style={{
                 whiteSpace: "pre-wrap",
-                height: "700px",
+                height: "800px",
                 overflow: "auto",
-
                 width: "500px",
                 hyphens: "auto",
+                wordWrap: "break-word", // Add this line to allow word wrapping
+                maxWidth: "100%", // Add this line to limit text width to container width
               }}
             >
               {formatText(contenttext[0].text)}
@@ -346,7 +386,7 @@ const Content = ({
                 marginRight: "60px",
               }}
             >
-              LÄHTEET
+              {lahdeTitles[1]}
             </Typography>
             <Typography
               variant="h5"
@@ -357,7 +397,7 @@ const Content = ({
                 color: "rgba(229, 47, 122)",
               }}
             >
-              ESITYKSEN TEKIJÄT
+              {lahdeTitles[0]}
             </Typography>
           </Link>
         </Grid>
@@ -378,17 +418,17 @@ const Content = ({
               flexDirection: "column",
               alignItems: "flex-start",
               width: "740px",
-              marginRight: "320px",
-              marginTop: isLongTitle ? "170px" : "-30px",
+              marginRight: "340px",
+              marginTop: isLongTitle ? "190px" : "80px",
               zIndex: "30",
-              marginLeft: "80px",
+              marginLeft: "4px",
             }}
           >
             <img
               src={`http://localhost:3001${content[0].image_path}`}
               alt="Hero"
               style={{
-                width: "815px",
+                width: "1100px",
                 height: "550px",
                 ...(selectedImage === 0 ? imageVariants.selected : {}),
               }}
@@ -422,34 +462,29 @@ const Content = ({
             </Typography>
           </Box>
 
-          <Grid
-            container
-            direction="row"
-            style={{
-              marginTop: "-300px",
-              marginRight: "650px",
-              marginLeft: "250px",
+          <ImageList
+            rows={1}
+            gap={50}
+            sx={{
+              marginBottom: "50px",
+              marginTop: "110px",
+              marginLeft: "50px",
             }}
-            justifyContent="center"
-            alignItems="center"
-            flexWrap="wrap"
-            spacing={"100px"}
           >
             {content.slice(1).map((item, index) => (
-              <Grid item xs={4} style={{ marginLeft: "50px" }} key={item.id}>
-                <div
-                  style={{
-                    height: "215px",
-                    width: "400px",
-                    objectFit: "fill",
-                    marginTop: "250px",
-                    zIndex: "3",
-
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
-                  {item.video_path ? (
+              <ImageListItem
+                key={item.id}
+                style={{
+                  maxWidth: "650px",
+                  maxHeight: "400px",
+                  marginLeft: "40px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-end",
+                }}
+              >
+                {item.video_path ? (
+                  <div style={{ position: "relative" }}>
                     <video
                       onClick={() => handleImageClick(index + 1)}
                       src={`http://localhost:3001${item.video_path}`}
@@ -459,15 +494,51 @@ const Content = ({
                           : null
                       }
                       style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        ...(selectedImage === index + 1
-                          ? imageVariants.selected
-                          : {}),
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        width: "auto",
+                        height: "auto",
+                        cursor: "pointer",
                       }}
                     />
-                  ) : (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleImageClick(index + 1)}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="64"
+                        height="64"
+                        viewBox="0 0 64 64"
+                      >
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="30"
+                          fill="none"
+                          stroke="#FFFFFF"
+                          strokeWidth="2"
+                        />
+                        <polygon
+                          points="45.04 32 24.96 45.04 24.96 18.96 45.04 32"
+                          fill="none"
+                          stroke="#FFFFFF"
+                          strokeWidth="2"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                ) : (
+                  <motion.div
+                    whileTap={imageVariants.tap}
+                    style={{ maxWidth: "80%", maxHeight: "100%" }}
+                  >
                     <motion.img
                       src={`http://localhost:3001${item.image_path}`}
                       alt={item.name}
@@ -480,19 +551,21 @@ const Content = ({
                       }
                       transition={{ duration: 0.1 }}
                       style={{
-                        width: "100%",
-                        height: "100%",
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        width: "auto",
+                        height: "auto",
                         cursor: "pointer",
                         objectFit: "contain",
                       }}
                     />
-                  )}
-                </div>
+                  </motion.div>
+                )}
+
                 <Typography
                   variant="body2"
                   style={{
                     textAlign: "left",
-                    marginLeft: "9px",
                     fontFamily: "Montserrat",
                     fontWeight: 500,
                     fontSize: "12.5px",
@@ -504,7 +577,6 @@ const Content = ({
                 <Typography
                   variant="body2"
                   sx={{
-                    marginLeft: "9px",
                     fontFamily: "Montserrat",
                     fontStyle: "italic",
                     fontSize: "11px",
@@ -515,9 +587,9 @@ const Content = ({
                 >
                   {item.imagetextbold}
                 </Typography>
-              </Grid>
+              </ImageListItem>
             ))}
-          </Grid>
+          </ImageList>
         </Grid>
       </Grid>
     );
@@ -526,13 +598,13 @@ const Content = ({
       <Grid
         container
         direction="column"
-        style={{ height: "100vh", overflow: "hidden" }}
+        style={{ height: "100vh", overflow: "hidden", marginTop: "50px" }}
       >
         <Grid
           item
           container
           direction="row"
-          style={{ overflowY: "hidden", marginLeft: "50px" }}
+          style={{ overflowY: "hidden", marginLeft: "70px" }}
           spacing={0}
         >
           {/* Hero Image Container */}
@@ -574,10 +646,12 @@ const Content = ({
               <Box
                 style={{
                   whiteSpace: "pre-wrap",
-                  height: "700px",
+                  height: "800px",
                   overflow: "auto",
                   width: "500px",
                   hyphens: "auto",
+                  wordWrap: "break-word",
+                  maxWidth: "100%",
                 }}
               >
                 {formatText(contenttext[0].text)}
@@ -603,7 +677,7 @@ const Content = ({
                     color: "rgba(229, 47, 122)",
                   }}
                 >
-                  LÄHTEET
+                  {lahdeTitles[0]}
                 </Typography>
                 <Typography
                   variant="h5"
@@ -615,7 +689,7 @@ const Content = ({
                     marginLeft: "50px",
                   }}
                 >
-                  ESITYKSEN TEKIJÄT
+                  {lahdeTitles[1]}
                 </Typography>
               </Link>
             </Box>
@@ -630,6 +704,7 @@ const Content = ({
               alignItems: "flex-start",
               overflow: "hidden",
               marginTop: "105px",
+              marginLeft: "-40px",
             }}
           >
             {/* Hero Image */}
@@ -639,15 +714,15 @@ const Content = ({
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-start",
-                marginTop: isLongTitle ? "105px" : "0px",
+                marginTop: isLongTitle ? "105px" : "50px",
               }}
             >
               <img
                 src={`http://localhost:3001${content[0].image_path}`}
                 alt="Hero"
                 style={{
-                  maxWidth: "600px",
-                  height: "800px",
+                  width: "600px",
+                  height: "900px",
                   ...(selectedImage === 0 ? imageVariants.selected : {}),
                 }}
                 onClick={() => handleImageClick(0)}
@@ -655,113 +730,70 @@ const Content = ({
                 transition={{ duration: 0.1 }}
               />
 
-              <Typography
-                variant="body2"
+              <Box
                 sx={{
+                  maxWidth: "500px",
                   marginTop: "10px",
-                  fontFamily: "Montserrat",
-                  fontWeight: 500,
-                  fontSize: "12.5px",
                 }}
-                gutterBottom
               >
-                {content[0].imagetext}
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontFamily: "Montserrat",
-                  fontStyle: "italic",
-                  fontSize: "11px",
-                  fontWeight: 500,
-                }}
-                gutterBottom
-              >
-                {content[0].imagetextbold}
-              </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: "Montserrat",
+                    fontWeight: 500,
+                    fontSize: "12.5px",
+                  }}
+                  gutterBottom
+                >
+                  {content[0].imagetext}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: "Montserrat",
+                    fontStyle: "italic",
+                    fontSize: "11px",
+                    fontWeight: 500,
+                  }}
+                  gutterBottom
+                >
+                  {content[0].imagetextbold}
+                </Typography>
+              </Box>
             </Box>
 
-            {/* Sliced Grid */}
-            <ImageList
-              cols={1}
-              gap={50}
-              sx={{ marginBottom: "50px", marginTop: "110px" }}
-            >
-              {content.slice(1).map((item, index) => (
-                <ImageListItem
-                  key={item.id}
+            {content.length === 2 ? (
+              <div>
+                <img
+                  src={`http://localhost:3001${content[1].image_path}`}
+                  alt="Hero"
                   style={{
-                    maxWidth: "400px",
-                    maxHeight: "400px",
-                    marginLeft: "100px",
-                    display: "flex",
-                    flexDirection: "column",
+                    marginTop: "105px",
+                    marginLeft: "40px",
+                    width: "500px",
+                    height: "800px",
+                    ...(selectedImage === 0 ? imageVariants.selected : {}),
+                  }}
+                  onClick={() => handleImageClick(1)}
+                  whiletap={imageVariants.tap}
+                  transition={{ duration: 0.1 }}
+                />
+                <Box
+                  sx={{
+                    maxWidth: "500px",
+                    marginTop: "10px",
                   }}
                 >
-                  <div
-                    style={{
-                      flex: 1,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      textAlign: "left",
-                      overflow: "hidden",
-                      position: "relative",
-                      paddingBottom: `${(item.height / item.width) * 100}%`,
-                    }}
-                  >
-                    {item.video_path ? (
-                      <video
-                        onClick={() => handleImageClick(index + 1)}
-                        src={`http://localhost:3001${item.video_path}`}
-                        poster={
-                          item.image_path
-                            ? `http://localhost:3001${item.image_path}`
-                            : null
-                        }
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: "100%",
-                          width: "auto",
-                          height: "auto",
-                          cursor: "pointer",
-                        }}
-                      />
-                    ) : (
-                      <motion.img
-                        src={`http://localhost:3001${item.image_path}`}
-                        alt={item.name}
-                        onClick={() => handleImageClick(index + 1)}
-                        whiletap={imageVariants.tap}
-                        animate={
-                          selectedImage === index + 1
-                            ? imageVariants.selected
-                            : {}
-                        }
-                        transition={{ duration: 0.1 }}
-                        style={{
-                          maxWidth: "100%",
-                          maxHeight: "100%",
-                          width: "auto",
-                          height: "auto",
-                          cursor: "pointer",
-                          objectFit: "contain",
-                        }}
-                      />
-                    )}
-                  </div>
                   <Typography
                     variant="body2"
-                    style={{
-                      textAlign: "left",
-
+                    sx={{
                       fontFamily: "Montserrat",
                       fontWeight: 500,
                       fontSize: "12.5px",
                     }}
                     gutterBottom
                   >
-                    {item.imagetext}
+                    {content[1].imagetext}
                   </Typography>
                   <Typography
                     variant="body2"
@@ -770,15 +802,163 @@ const Content = ({
                       fontStyle: "italic",
                       fontSize: "11px",
                       fontWeight: 500,
-                      textAlign: "left",
                     }}
                     gutterBottom
                   >
-                    {item.imagetextbold}
+                    {content[1].imagetextbold}
                   </Typography>
-                </ImageListItem>
-              ))}
-            </ImageList>
+                </Box>
+              </div>
+            ) : (
+              <ImageList
+                cols={1}
+                gap={50}
+                sx={{ marginBottom: "50px", marginTop: "110px" }}
+              >
+                {content.slice(1).map((item, index) => (
+                  <ImageListItem
+                    className={
+                      item.height > item.width
+                        ? "image-with-more-height"
+                        : "image-with-more-width"
+                    }
+                    key={item.id}
+                    style={{
+                      maxWidth: "400px",
+                      maxHeight: "500px",
+                      marginLeft: "100px",
+                      display: "flex",
+                      flexDirection: "column",
+
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        textAlign: "left",
+                        overflow: "hidden",
+                        position: "relative",
+                        paddingBottom: `${(item.height / item.width) * 100}%`,
+                      }}
+                    >
+                      {item.video_path ? (
+                        <div style={{ position: "relative" }}>
+                          <video
+                            onClick={() => handleImageClick(index + 1)}
+                            src={`http://localhost:3001${item.video_path}`}
+                            poster={
+                              item.image_path
+                                ? `http://localhost:3001${item.image_path}`
+                                : null
+                            }
+                            style={{
+                              maxWidth: "100%",
+                              maxHeight: "100%",
+                              width: "auto",
+                              height: "auto",
+                              cursor: "pointer",
+                            }}
+                          />
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "50%",
+                              left: "50%",
+                              transform: "translate(-50%, -50%)",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => handleImageClick(index + 1)}
+                          >
+                            {/* You can customize the play button icon here */}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="64"
+                              height="64"
+                              viewBox="0 0 64 64"
+                            >
+                              <circle
+                                cx="32"
+                                cy="32"
+                                r="30"
+                                fill="none"
+                                stroke="#FFFFFF"
+                                strokeWidth="2"
+                              />
+                              <polygon
+                                points="45.04 32 24.96 45.04 24.96 18.96 45.04 32"
+                                fill="none"
+                                stroke="#FFFFFF"
+                                strokeWidth="2"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      ) : (
+                        <motion.img
+                          src={`http://localhost:3001${item.image_path}`}
+                          alt={item.name}
+                          onClick={() => handleImageClick(index + 1)}
+                          whiletap={imageVariants.tap}
+                          animate={
+                            selectedImage === index + 1
+                              ? imageVariants.selected
+                              : {}
+                          }
+                          transition={{ duration: 0.1 }}
+                          style={{
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            width: "auto",
+                            height: "auto",
+                            cursor: "pointer",
+                            objectFit: "contain",
+                          }}
+                        />
+                      )}
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        textAlign: "left",
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        style={{
+                          textAlign: "left",
+                          fontFamily: "Montserrat",
+                          fontWeight: 500,
+                          fontSize: "12.5px",
+                          marginTop: "5px",
+                        }}
+                        gutterBottom
+                      >
+                        {item.imagetext}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: "Montserrat",
+                          fontStyle: "italic",
+                          fontSize: "11px",
+                          fontWeight: 500,
+                          textAlign: "left",
+                        }}
+                        gutterBottom
+                      >
+                        {item.imagetextbold}
+                      </Typography>
+                    </div>
+                  </ImageListItem>
+                ))}
+              </ImageList>
+            )}
           </Grid>
         </Grid>
       </Grid>

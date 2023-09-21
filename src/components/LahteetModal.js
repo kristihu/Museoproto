@@ -63,6 +63,7 @@ const LahteetModal = ({ open, onClose, selectedSubcategory }) => {
     if (testi) {
       updateLahteet(selectedSubcategory.id, formDataWithId)
         .then(() => {
+          window.alert("Lähteiden tallennus onnistui!");
           onClose();
         })
         .catch((error) => {
@@ -79,6 +80,7 @@ const LahteetModal = ({ open, onClose, selectedSubcategory }) => {
             esiintyjat_sv: "",
             lahteet: "",
           });
+          window.alert("Lähteiden tallennus onnistui!");
           onClose();
         })
         .catch((error) => {

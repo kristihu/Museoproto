@@ -45,6 +45,8 @@ body,
 
   height: 100vh;
   background-image: url("./images/testi.jpg");
+  filter: contrast(-4);
+
   background-size: cover;
   z-index: 1;
 }
@@ -58,7 +60,7 @@ body,
   bottom: 0px;
   left: 0px;
 
-  background-color: rgba(164, 216, 222, 0.5);
+  background-color: rgba(144, 230, 222, 0.7);
   background-size: cover;
 }
 
@@ -69,6 +71,12 @@ body,
   touch-action: none;
 }
 
+.App.projector .content-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .App.projector .content {
   width: 100%;
 }

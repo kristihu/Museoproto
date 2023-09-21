@@ -30,6 +30,7 @@ const Home = ({ socket }) => {
   const [selectedTitle, setSelectedTitle] = useState("");
   const [selectedSubTitle, setSelectedSubTitle] = useState("");
   const [testTitle, setTestTitle] = useState("");
+  const [lahdeTitles, setlahdeTitles] = useState([]);
 
   const query = useQuery();
   const isProjector = query.get("projector") === "true";
@@ -80,6 +81,10 @@ const Home = ({ socket }) => {
       setSelectedSubTitle(subtitle);
     });
 
+    socket.on("displayLahteetTitles", (titles) => {
+      setlahdeTitles(titles);
+    });
+
     socket.on("displayContent", (data) => {
       console.log(data, "datatata");
       setSubcategories([]);
@@ -92,9 +97,11 @@ const Home = ({ socket }) => {
       console.log(data.subTitle, "auth");
       if (isProjector) {
         const videoItem = data.media.find((item) => item.video_path);
+
         if (videoItem) {
+          console.log(videoItem, "v ides");
           setCarouselMode(false);
-          setVideo(videoItem.video_path);
+          setVideo({ path: videoItem.video_path, quality: videoItem.quality });
         } else if (data.media.some((item) => item.image_path)) {
           setImages(data.media.map((item) => item.image_path));
           setCarouselMode(true);
@@ -113,9 +120,9 @@ const Home = ({ socket }) => {
       }
     });
 
-    socket.on("playVideo", (videoPath) => {
-      console.log(videoPath, "VCIDEO");
-      setVideo(videoPath);
+    socket.on("playVideo", (videoData) => {
+      console.log(videoData, "VCIDEO");
+      setVideo({ path: videoData.video_path, quality: videoData.quality });
       setCarouselMode(false);
     });
     socket.on("languageIconClicked", () => {
@@ -157,6 +164,7 @@ const Home = ({ socket }) => {
       socket.off("carouselToggled");
       socket.off("displaySubtitle");
       socket.off("displayTitle");
+      socket.off("languageIconClicked");
     };
   }, [socket, isProjector, selectedLanguage]);
 
@@ -213,8 +221,10 @@ const Home = ({ socket }) => {
       }
     } else {
       socket.emit("imageClicked", content[0]?.subcategory_id, index);
-      handleToggleClick();
-      setCarouselMode(true);
+      if (!togglePause) {
+        handleToggleClick();
+        setCarouselMode(true);
+      }
     }
   };
   const handleResetProjector = () => {
@@ -242,14 +252,29 @@ const Home = ({ socket }) => {
   }
 
   if (isProjector && video && !carouselMode) {
-    const videoUrl = `http://localhost:3001${video}`;
+    let videoWidth = "100%";
+    let videoHeight = "100%";
+
+    if (video.quality === "low") {
+      videoWidth = "80%";
+      videoHeight = "60%";
+    } else if (video.quality === "medium") {
+      videoWidth = "640px";
+      videoHeight = "480px";
+    } else if (video.quality === "high") {
+      videoWidth = "100%";
+      videoHeight = "100%";
+    }
+
+    const videoUrl = `http://localhost:3001${video.path}`;
+
     return (
       <div className="App">
         <video
-          width="100%"
-          height="100%"
-          controls
+          width={videoWidth}
+          height={videoHeight}
           autoPlay
+          muted
           onCanPlay={(e) => e.target.play()}
         >
           <source src={videoUrl} type="video/mp4" />
@@ -278,45 +303,51 @@ const Home = ({ socket }) => {
               handlePlayToggle={handlePlayToggle}
               socket={socket}
               handleResetProjector={handleResetProjector}
+              content={content}
+              togglePause={handleToggleClick}
+              playpause={togglePause}
             />
           </div>
         )}
-        <div className="content">
-          {categories.length > 0 && (
-            <Categories
-              selectedTitle={selectedTitle}
-              selectedSubTitle={selectedSubTitle}
-              categories={categories}
-              onCategoryClick={handleCategoryClick}
-            />
-          )}
-          {subcategories.length > 0 && (
-            <Subcategories
-              selectedCategory={selectedCategory}
-              categories={categories}
-              subcategories={subcategories}
-              onSubcategoryClick={handleSubcategoryClick}
-              selectedLanguage={selectedLanguage}
-              testTitle={testTitle}
-            />
-          )}
-          {content.length > 0 && (
-            <>
-              <Content
-                content={content}
-                contenttext={contenttext}
-                onImageClick={handleImageClick}
-                clickedImageIndex={clickedImageIndex}
-                handleToggleClick={handleToggleClick}
-                showAuthors={showAuthors}
-                setShowAuthors={setShowAuthors}
-                authors={authors}
-                socket={socket}
-                subTitle={subTitle}
-                subTitle2={subTitle2}
+        <div className="content-container">
+          <div className="content">
+            {categories.length > 0 && (
+              <Categories
+                selectedTitle={selectedTitle}
+                selectedSubTitle={selectedSubTitle}
+                categories={categories}
+                onCategoryClick={handleCategoryClick}
               />
-            </>
-          )}
+            )}
+            {subcategories.length > 0 && (
+              <Subcategories
+                selectedCategory={selectedCategory}
+                categories={categories}
+                subcategories={subcategories}
+                onSubcategoryClick={handleSubcategoryClick}
+                selectedLanguage={selectedLanguage}
+                testTitle={testTitle}
+              />
+            )}
+            {content.length > 0 && (
+              <>
+                <Content
+                  content={content}
+                  contenttext={contenttext}
+                  onImageClick={handleImageClick}
+                  clickedImageIndex={clickedImageIndex}
+                  handleToggleClick={handleToggleClick}
+                  showAuthors={showAuthors}
+                  setShowAuthors={setShowAuthors}
+                  authors={authors}
+                  socket={socket}
+                  subTitle={subTitle}
+                  subTitle2={subTitle2}
+                  lahdeTitles={lahdeTitles}
+                />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

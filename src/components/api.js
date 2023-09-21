@@ -191,7 +191,7 @@ export const createLahteet = (formData) => {
 
 // create media
 export const createMedia = (subcategoryId, formData) => {
-  console.log(subcategoryId, "HAHHEHEHHE");
+  console.log(formData, "HAHHEHEHHE");
   return axios.post(`http://localhost:3001/media/${subcategoryId}`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",

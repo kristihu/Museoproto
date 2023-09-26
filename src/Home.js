@@ -255,17 +255,6 @@ const Home = ({ socket }) => {
     let videoWidth = "100%";
     let videoHeight = "100%";
 
-    if (video.quality === "low") {
-      videoWidth = "80%";
-      videoHeight = "60%";
-    } else if (video.quality === "medium") {
-      videoWidth = "640px";
-      videoHeight = "480px";
-    } else if (video.quality === "high") {
-      videoWidth = "100%";
-      videoHeight = "100%";
-    }
-
     const videoUrl = `http://localhost:3001${video.path}`;
 
     return (

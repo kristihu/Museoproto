@@ -160,6 +160,7 @@ app.post("/subcategories", async (req, res) => {
       alateksti_sv,
       image_path,
       category_id,
+      vuosi,
     } = req.body;
 
     if (!image_path) {
@@ -176,7 +177,7 @@ app.post("/subcategories", async (req, res) => {
 
     const connection = await pool.getConnection();
     const [result] = await connection.query(
-      "INSERT INTO subcategory (name, name_en, name_sv, alateksti, alateksti_en, alateksti_sv, image_path, category_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO subcategory (name, name_en, name_sv, alateksti, alateksti_en, alateksti_sv, image_path, category_id,vuosi) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)",
       [
         name,
         name_en,
@@ -186,6 +187,7 @@ app.post("/subcategories", async (req, res) => {
         alateksti_sv,
         formattedImagePath,
         category_id,
+        vuosi,
       ]
     );
     connection.release();
@@ -394,7 +396,7 @@ app.get("/subcategories", async (req, res) => {
   try {
     const categoryId = req.query.category_id;
     let query =
-      "SELECT id, image_path, name, name_en, name_sv, alateksti, alateksti_en, alateksti_sv, category_id FROM subcategory";
+      "SELECT id, image_path, name, name_en, name_sv, alateksti, alateksti_en, alateksti_sv, category_id, vuosi FROM subcategory";
     let queryParams = [];
 
     if (categoryId) {
@@ -721,6 +723,7 @@ app.get("/subcategories/:categoryId", async (req, res) => {
       "alateksti",
       "alateksti_en",
       "alateksti_sv",
+      "vuosi",
     ];
 
     const selectedTranslationColumn = translationColumns.includes(
@@ -759,6 +762,7 @@ app.get("/subcategory/:subcategoryId", async (req, res) => {
       "alateksti",
       "alateksti_en",
       "alateksti_sv",
+      "vuosi",
     ];
 
     const selectedTranslationColumn = translationColumns.includes(
@@ -775,7 +779,7 @@ app.get("/subcategory/:subcategoryId", async (req, res) => {
 
     const connection = await pool.getConnection();
     const [row] = await connection.query(
-      `SELECT id, ${selectedTranslationColumn} AS name, image_path, category_id, name_en, name_sv, ${selectedAlatekstiColumn} AS alateksti, alateksti_en, alateksti_sv FROM subcategory WHERE id = ?`,
+      `SELECT id, ${selectedTranslationColumn} AS name, image_path, category_id, name_en, name_sv, ${selectedAlatekstiColumn} AS alateksti, alateksti_en, alateksti_sv, vuosi FROM subcategory WHERE id = ?`,
       [subcategoryId]
     );
     connection.release();
@@ -836,7 +840,7 @@ io.on("connection", async (socket) => {
           : "name";
 
       const query = `
-      SELECT id, image_path, ?? AS name, ?? AS alateksti
+      SELECT id, image_path, ?? AS name, ?? AS alateksti, vuosi
       FROM subcategory
       WHERE category_id = ?
     `;
@@ -1019,7 +1023,7 @@ io.on("connection", async (socket) => {
           : selectedLanguage === "sv"
           ? "alateksti_sv"
           : "alateksti";
-      const query = `SELECT id, image_path, ?? AS name, ?? as alateksti FROM subcategory WHERE category_id = ?`;
+      const query = `SELECT id, image_path, ?? AS name, ?? as alateksti, vuosi FROM subcategory WHERE category_id = ?`;
       const queryParams = [translationColumn, alatekstiColumn, categoryId];
       const [rows] = await connection.query(query, queryParams);
       const categoryQuery = `

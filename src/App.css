@@ -1,11 +1,15 @@
-html,
 body,
-#root {
-  overflow-x: hidden;
-  overflow-y: hidden;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+  padding: 0;
 }
 
 .container {
@@ -16,6 +20,9 @@ body,
 
 .App {
   user-select: none;
+  font-family: Montserrat;
+  overflow: hidden;
+  height: 100vh;
 }
 
 .non-projector .content {
@@ -40,13 +47,11 @@ body,
   overflow-x: hidden;
   overflow-y: hidden;
   position: relative;
-  width: calc(100% - 230px); /* Subtract the width of the sidebar */
+  width: calc(100% - 300px); /* Subtract the width of the sidebar */
   display: flex;
 
   height: 100vh;
   background-image: url("./images/testi.jpg");
-  filter: contrast(-4);
-
   background-size: cover;
   z-index: 1;
 }
@@ -60,7 +65,7 @@ body,
   bottom: 0px;
   left: 0px;
 
-  background-color: rgba(144, 230, 222, 0.7);
+  background-color: rgba(164, 216, 222, 0.5);
   background-size: cover;
 }
 
@@ -71,12 +76,6 @@ body,
   touch-action: none;
 }
 
-.App.projector .content-container {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 .App.projector .content {
   width: 100%;
 }

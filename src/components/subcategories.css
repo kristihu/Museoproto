@@ -1,0 +1,42 @@
+.containerr {
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+.sub-grid {
+  display: grid;
+  gap: 1px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+/* Adjust the subcard size */
+.subcard {
+  /* Add padding to the subcards */
+  text-align: left; /* Center align text */
+}
+
+/* Adjust the image size within subcards */
+.kuva {
+  width: 90%;
+  aspect-ratio: 2/1.5;
+  object-fit: cover;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.8);
+}
+
+/* Adjust typography styles */
+.subcard h4 {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  margin-top: 10px; /* Add margin to the top of the subcategory name */
+}
+
+.subcard p {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  margin: 10px 0; /* Add margin to the subcategory description */
+  word-wrap: break-word;
+}

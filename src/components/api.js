@@ -35,6 +35,7 @@ export const createSubcategory = (subcategory, categoryId) => {
     alateksti,
     alateksti_en,
     alateksti_sv,
+    vuosi,
     selectedImage,
   } = subcategory;
 
@@ -57,6 +58,7 @@ export const createSubcategory = (subcategory, categoryId) => {
         alateksti,
         alateksti_en,
         alateksti_sv,
+        vuosi,
         image_path: imagePath,
         category_id: categoryId,
       });

@@ -60,6 +60,7 @@ const AdminPanel = () => {
     alateksti_en: "",
     alateksti_sv: "",
     imagePath: "",
+    vuosi: "",
     selectedImage: null,
   });
   const [mediaModalOpen, setMediaModalOpen] = useState(false);
@@ -258,6 +259,7 @@ const AdminPanel = () => {
           alateksti: "",
           alateksti_en: "",
           alateksti_sv: "",
+          vuosi: "",
           selectedImage: null,
         });
       })
@@ -546,6 +548,16 @@ const AdminPanel = () => {
             setNewSubcategory((prevSubcategory) => ({
               ...prevSubcategory,
               alateksti_sv: e.target.value,
+            }))
+          }
+        />
+        <TextField
+          label="Vuosi"
+          value={newSubcategory.vuosi}
+          onChange={(e) =>
+            setNewSubcategory((prevSubcategory) => ({
+              ...prevSubcategory,
+              vuosi: e.target.value,
             }))
           }
         />

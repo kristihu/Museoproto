@@ -31,6 +31,7 @@ const Home = ({ socket }) => {
   const [selectedSubTitle, setSelectedSubTitle] = useState("");
   const [testTitle, setTestTitle] = useState("");
   const [lahdeTitles, setlahdeTitles] = useState([]);
+  const [videoIcon, setVideoIcon] = useState(false);
 
   const query = useQuery();
   const isProjector = query.get("projector") === "true";
@@ -105,6 +106,7 @@ const Home = ({ socket }) => {
         } else if (data.media.some((item) => item.image_path)) {
           setImages(data.media.map((item) => item.image_path));
           setCarouselMode(true);
+          setVideoIcon(true);
         }
       }
     });
@@ -124,6 +126,7 @@ const Home = ({ socket }) => {
       console.log(videoData, "VCIDEO");
       setVideo({ path: videoData.video_path, quality: videoData.quality });
       setCarouselMode(false);
+      setVideoIcon(false);
     });
     socket.on("languageIconClicked", () => {
       setTogglePause(false);
@@ -213,6 +216,7 @@ const Home = ({ socket }) => {
     if (isProjector) {
       if (selectedItem.video_path) {
         socket.emit("playVideo", selectedItem.video_path);
+        setVideo(false);
       } else {
         const imagePaths = images.map((item) => item.image_path);
 
@@ -221,7 +225,9 @@ const Home = ({ socket }) => {
       }
     } else {
       socket.emit("imageClicked", content[0]?.subcategory_id, index);
+      setVideoIcon(true);
       if (!togglePause) {
+        setVideoIcon(true);
         handleToggleClick();
         setCarouselMode(true);
       }
@@ -333,6 +339,7 @@ const Home = ({ socket }) => {
                   subTitle={subTitle}
                   subTitle2={subTitle2}
                   lahdeTitles={lahdeTitles}
+                  videoIcon={videoIcon}
                 />
               </>
             )}

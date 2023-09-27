@@ -1,14 +1,11 @@
 import React from "react";
-import { Grid, Box, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import "./subcategories.css";
 
 const Subcategories = ({
   subcategories,
   onSubcategoryClick,
-  lastCategoryId,
-  categories,
-  selectedCategory,
-  selectedLanguage,
+
   testTitle,
 }) => {
   const sortedSubcategories = subcategories
@@ -36,7 +33,7 @@ const Subcategories = ({
       <div className="containerr">
         <div className="sub-grid">
           {sortedSubcategories.map((subcategory) => (
-            <div class="subcard stacked featured" key={subcategory.id}>
+            <div key={subcategory.id}>
               <img
                 className="kuva"
                 src={`http://localhost:3001${subcategory.image_path}`}

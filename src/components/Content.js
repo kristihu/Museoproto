@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from "react";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import { motion } from "framer-motion";
-import {
-  Grid,
-  Typography,
-  Box,
-  Link,
-  ImageList,
-  ImageListItem,
-} from "@mui/material";
+
+import { Grid, Typography, Box, Link } from "@mui/material";
 import "./Content.css";
 
 const imageVariants = {
@@ -21,7 +16,7 @@ const Content = ({
 
   contenttext,
   lahdeTitles,
-
+  videoIcon,
   showAuthors,
   setShowAuthors,
   authors,
@@ -200,7 +195,7 @@ const Content = ({
     return (
       <div style={{ marginLeft: "60px", marginRight: "60px" }}>
         <Grid container>
-          <Grid item xs={6} direction="row">
+          <Grid item xs={6}>
             <Typography
               variant="h4"
               sx={{
@@ -437,6 +432,7 @@ const Content = ({
                   {item.video_path ? (
                     <div style={{ position: "relative" }}>
                       <video
+                        whiletap={imageVariants.tap}
                         onClick={() => handleImageClick(index + 1)}
                         src={`http://localhost:3001${item.video_path}`}
                         poster={
@@ -445,44 +441,31 @@ const Content = ({
                             : null
                         }
                         style={{
-                          width: "350px",
-                          marginRight: "1rem",
-
                           cursor: "pointer",
+                          width: "100%",
                         }}
                       />
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          transform: "translate(-50%, -50%)",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => handleImageClick(index + 1)}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="64"
-                          height="64"
-                          viewBox="0 0 64 64"
+                      {videoIcon ? (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-100%, -50%)",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => handleImageClick(index + 1)}
                         >
-                          <circle
-                            cx="32"
-                            cy="32"
-                            r="30"
-                            fill="none"
-                            stroke="#FFFFFF"
-                            strokeWidth="2"
+                          <PlayCircleOutlineIcon
+                            style={{
+                              width: 64,
+                              height: 64,
+                              fill: "#FFFFFF",
+                              strokeWidth: 2,
+                            }}
                           />
-                          <polygon
-                            points="45.04 32 24.96 45.04 24.96 18.96 45.04 32"
-                            fill="none"
-                            stroke="#FFFFFF"
-                            strokeWidth="2"
-                          />
-                        </svg>
-                      </div>
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
                     <motion.div whileTap={imageVariants.tap}>
@@ -498,11 +481,7 @@ const Content = ({
                             : {}
                         }
                         transition={{ duration: 0.1 }}
-                        style={{
-                          cursor: "pointer",
-                          maxWidth: "80%",
-                          width: "84%",
-                        }}
+                        style={{}}
                       />
                     </motion.div>
                   )}
@@ -675,6 +654,7 @@ const Content = ({
                   {item.video_path ? (
                     <div style={{ position: "relative" }}>
                       <video
+                        whiletap={imageVariants.tap}
                         onClick={() => handleImageClick(index + 1)}
                         src={`http://localhost:3001${item.video_path}`}
                         poster={
@@ -683,45 +663,34 @@ const Content = ({
                             : null
                         }
                         style={{
-                          maxWidth: "90%",
+                          width: "85%",
                           maxHeight: "100%",
                           width: "auto",
                           height: "auto",
                           cursor: "pointer",
                         }}
                       />
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "50%",
-                          left: "50%",
-                          transform: "translate(-50%, -50%)",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => handleImageClick(index + 1)}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="64"
-                          height="64"
-                          viewBox="0 0 64 64"
+                      {videoIcon ? (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-75%, -50%)",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => handleImageClick(index + 1)}
                         >
-                          <circle
-                            cx="32"
-                            cy="32"
-                            r="30"
-                            fill="none"
-                            stroke="#FFFFFF"
-                            strokeWidth="2"
+                          <PlayCircleOutlineIcon
+                            style={{
+                              width: 64,
+                              height: 64,
+                              fill: "#FFFFFF",
+                              strokeWidth: 2,
+                            }}
                           />
-                          <polygon
-                            points="45.04 32 24.96 45.04 24.96 18.96 45.04 32"
-                            fill="none"
-                            stroke="#FFFFFF"
-                            strokeWidth="2"
-                          />
-                        </svg>
-                      </div>
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
                     <motion.div whileTap={imageVariants.tap}>
@@ -737,12 +706,7 @@ const Content = ({
                             : {}
                         }
                         transition={{ duration: 0.1 }}
-                        style={{
-                          cursor: "pointer",
-                          maxWidth: "90%",
-                          width: "100%",
-                          maxHeight: "400px",
-                        }}
+                        style={{}}
                       />
                     </motion.div>
                   )}

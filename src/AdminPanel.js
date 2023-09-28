@@ -563,7 +563,7 @@ const AdminPanel = () => {
         />
         <TextField value={newSubcategory.imagePath} disabled />
         <input type="file" onChange={handleNewImageChange} />
-        <Button onClick={handleCreateSubcategory}>Create</Button>
+        <Button onClick={handleCreateSubcategory}>Lisää</Button>
       </div>
 
       <TableContainer component={Paper}>
@@ -714,6 +714,21 @@ const AdminPanel = () => {
           <h2>Media</h2>
           {selectedMedia.map((media, index) => (
             <div key={media.id}>
+              {media.image_path && (
+                <img
+                  style={{ height: "50px" }}
+                  src={`http://localhost:3001${media.image_path}`}
+                ></img>
+              )}
+              {media.video_path && (
+                <video style={{ height: "50px" }} controls autoPlay muted>
+                  <source
+                    src={`http://localhost:3001${media.video_path}`}
+                    type="video/mp4"
+                  />
+                  Your browser does not support the video tag.
+                </video>
+              )}
               <TextField
                 label="Kuvateksti"
                 name="imagetext"
@@ -836,39 +851,39 @@ const AdminPanel = () => {
             maxHeight: "80vh",
           }}
         >
-          <h2>Add New Media</h2>
+          <h2>Lisää uutta mediaa</h2>
           <TextField
-            label="Image Text"
+            label="Kuvateksti"
             name="imagetext"
             value={newMedia.imagetext}
             onChange={handleAddMediaChange}
           />
           <TextField
-            label="Image Text Bold"
+            label="kuvateksti Bold"
             name="imagetextbold"
             value={newMedia.imagetextbold}
             onChange={handleAddMediaChange}
           />
           <TextField
-            label="Image Text (English)"
+            label="kuvateksti (English)"
             name="imagetext_en"
             value={newMedia.imagetext_en}
             onChange={handleAddMediaChange}
           />
           <TextField
-            label="Image Text (Swedish)"
+            label="kuvateksti (Swedish)"
             name="imagetext_sv"
             value={newMedia.imagetext_sv}
             onChange={handleAddMediaChange}
           />
           <TextField
-            label="Image Text Bold (English)"
+            label="kuvateksti(English)"
             name="imagetextbold_en"
             value={newMedia.imagetextbold_en}
             onChange={handleAddMediaChange}
           />
           <TextField
-            label="Image Text Bold (Swedish)"
+            label="kuvateksti (Swedish)"
             name="imagetextbold_sv"
             value={newMedia.imagetextbold_sv}
             onChange={handleAddMediaChange}
@@ -884,7 +899,7 @@ const AdminPanel = () => {
           </Select>
           <input type="file" onChange={handleAddMediaChange} />
 
-          <Button onClick={handleCreateMedia}>Create</Button>
+          <Button onClick={handleCreateMedia}>Lisää</Button>
         </Box>
       </Modal>
       <LahteetModal

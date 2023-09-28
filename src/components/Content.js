@@ -189,8 +189,6 @@ const Content = ({
   };
   const titleThreshold = 20;
 
-  const isLongTitle = subTitle.length > titleThreshold;
-
   if (showAuthors && authors.length > 0) {
     return (
       <div style={{ marginLeft: "60px", marginRight: "60px" }}>
@@ -346,7 +344,7 @@ const Content = ({
                     maxWidth: "100%",
                   }}
                 >
-                  {formatText(contenttext[0].text)}
+                  {contenttext[0] && formatText(contenttext[0].text)}
                 </Box>
               </div>
               <Link
@@ -567,7 +565,7 @@ const Content = ({
                   maxWidth: "100%",
                 }}
               >
-                {formatText(contenttext[0].text)}
+                {contenttext[0] && formatText(contenttext[0].text)}
               </Box>
 
               <Link

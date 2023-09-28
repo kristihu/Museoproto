@@ -142,6 +142,7 @@ const Home = ({ socket }) => {
     });
 
     socket.on("displayCategoriesOnHome", (data) => {
+      console.log(data, "DATAHOME");
       setCategories(data);
       setSubcategories([]);
       setContent([]);
@@ -150,6 +151,7 @@ const Home = ({ socket }) => {
       setCarouselMode(false);
       setClickedImageIndex(null);
       setContenttext(null);
+      setAuthors(null);
     });
 
     socket.on("carouselToggled", () => {

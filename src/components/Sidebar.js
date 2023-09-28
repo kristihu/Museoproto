@@ -45,12 +45,13 @@ const Sidebar = ({
         >
           <img src={fi} alt="Finnish" style={{ width: "75%", height: "75%" }} />
         </IconButton>
-        <IconButton
+        {/*  <IconButton
           onClick={() => handleLanguageChange("en")}
           className={highlightedLanguage === "en" ? "highlighted-language" : ""}
         >
           <img src={en} alt="English" style={{ width: "75%", height: "75%" }} />
-        </IconButton>
+        </IconButton> */}
+
         <IconButton
           onClick={() => handleLanguageChange("sv")}
           className={highlightedLanguage === "sv" ? "highlighted-language" : ""}

@@ -107,7 +107,7 @@ const LahteetModal = ({ open, onClose, selectedSubcategory }) => {
       >
         <TextField
           name="tekijat"
-          label="Tekijät"
+          label="Esiintyjät"
           multiline
           rows={10}
           value={formData.tekijat}
@@ -119,7 +119,7 @@ const LahteetModal = ({ open, onClose, selectedSubcategory }) => {
 
         <TextField
           name="esiintyjat"
-          label="esiintyjat"
+          label="Tekijät"
           multiline
           rows={10}
           value={formData.esiintyjat}
@@ -129,7 +129,7 @@ const LahteetModal = ({ open, onClose, selectedSubcategory }) => {
           margin="normal"
         />
         <TextField
-          name="esiintyjat_en"
+          name="Tekijät_en"
           label="esiintyjaten"
           multiline
           rows={10}
@@ -140,7 +140,7 @@ const LahteetModal = ({ open, onClose, selectedSubcategory }) => {
           margin="normal"
         />
         <TextField
-          name="esiintyjat_sv"
+          name="tekijät_sv"
           label="esiintyjatensv"
           multiline
           rows={10}
